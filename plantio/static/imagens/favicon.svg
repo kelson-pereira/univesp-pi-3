@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   class="svg-icon"
+   style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;"
+   viewBox="0 0 1024 1024"
+   version="1.1"
+   id="svg1148"
+   sodipodi:docname="favicon.svg"
+   inkscape:version="1.1 (c4e8f9e, 2021-05-24)"
+   inkscape:export-filename="/Users/kelson/Documents/projetos/git/univesp-pi-3/static/imagens/favicon.png"
+   inkscape:export-xdpi="48"
+   inkscape:export-ydpi="48"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1152" />
+  <sodipodi:namedview
+     id="namedview1150"
+     pagecolor="#ffffff"
+     bordercolor="#999999"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:zoom="0.3566741"
+     inkscape:cx="431.76671"
+     inkscape:cy="848.11317"
+     inkscape:window-width="1435"
+     inkscape:window-height="847"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg1148" />
+  <path
+     d="M725.333333 341.333333C341.333333 426.666667 251.733333 689.92 162.986667 910.506667l80.64 28.16 40.533333-98.133334c20.48 7.253333 41.813333 12.8 57.173333 12.8C810.666667 853.333333 938.666667 128 938.666667 128c-42.666667 85.333333-341.333333 96-554.666667 138.666667S85.333333 490.666667 85.333333 576s74.666667 160 74.666667 160C298.666667 341.333333 725.333333 341.333333 725.333333 341.333333z"
+     fill=""
+     id="path1146"
+     style="fill:#008000" />
+</svg>

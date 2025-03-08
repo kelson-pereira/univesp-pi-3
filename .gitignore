@@ -169,3 +169,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# media files
+/media
+
+# macOS
+.DS_Store
