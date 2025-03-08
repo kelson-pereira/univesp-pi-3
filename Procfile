@@ -1,0 +1,1 @@
+web: gunicorn univesp_pi_2.wsgi
