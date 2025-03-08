@@ -1,1 +1,1 @@
-web: gunicorn univesp_pi_2.wsgi
+web: gunicorn univesp_pi_3.wsgi
