@@ -22,5 +22,5 @@ from plantio import views
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path('', views.home, name='home'),
-    path('favicon.ico', RedirectView.as_view(url='/static/imagens/favicon.ico')),
+    path('favicon.ico', RedirectView.as_view(url='/static/imagens/favicon.ico', permanent=True)),
 ]
