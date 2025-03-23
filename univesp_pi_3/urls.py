@@ -18,10 +18,13 @@ Incluindo outra configuração de URL:
 from django.urls import path
 from django.views.generic import RedirectView
 from plantio import views
+from plantio.views import home, led_status, toggle_led, led_control_view
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     path('favicon.ico', RedirectView.as_view(url='/static/imagens/favicon.ico', permanent=True)),
     path('led/status/', views.led_status, name='led_status'),
+    path('led/toggle/', views.toggle_led, name='toggle_led'),
+    path("led/control/", views.led_control_view, name="led_control"),
 ]
