@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle do LED</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #4CAF50; }
+        input:checked + .slider:before { transform: translateX(26px); }
+    </style>
+  </head>
+  <body>
+    <form>
+      {% csrf_token %}
+      <h1>Controle do LED</h1>
+      <label class="switch">
+        <input type="checkbox" id="ledSwitch" {% if status %}checked{% endif %}>
+        <span class="slider"></span>
+      </label>
+      <p>Status do LED: <span id="ledStatus">{% if status %}Ligado{% else %}Desligado{% endif %}</span></p>
+    </form>
+
+    <script>
+      $(document).ready(function() {
+          function getCSRFToken() {
+            return $("input[name=csrfmiddlewaretoken]").val();
+          }
+
+          $.get("/led/status/", function(data) {
+            $("#ledSwitch").prop("checked", data.status);
+            $("#ledStatus").text(data.status ? "Ligado" : "Desligado");
+          });
+
+          $("#ledSwitch").change(function() {
+              $.ajax({
+                  url: "/led/toggle/",
+                  type: "POST",
+                  data: {},
+                  headers: {
+                      "X-CSRFToken": getCSRFToken()
+                  },
+                  success: function(data) {
+                      $("#ledStatus").text(data.led ? "Ligado" : "Desligado");
+                  },
+                  error: function(xhr, status, error) {
+                      console.log("Erro na requisição:", error);
+                  }
+              });
+          });
+      });
+    </script>
+  </body>
+</html>
