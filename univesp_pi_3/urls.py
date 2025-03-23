@@ -23,4 +23,5 @@ urlpatterns = [
     # path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     path('favicon.ico', RedirectView.as_view(url='/static/imagens/favicon.ico', permanent=True)),
+    path('led/status/', views.led_status, name='led_status'),
 ]
