@@ -22,6 +22,7 @@ def led_control_view(request):
     led = Led.objects.first()
     return render(request, "led_control.html", {"status": led.status if led else False})
 
+@csrf_exempt
 def sensor_data(request):
     data = request.POST
     mac_address = data.get('mac')
