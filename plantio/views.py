@@ -21,7 +21,8 @@ def toggle_led(request):
 
 def led_control_view(request):
     led = Led.objects.first()
-    return render(request, "led_control.html", {"status": led.status if led else False})
+    sensors = Sensor.objects.all()
+    return render(request, "led_control.html", {"status": led.status if led else False}, {"sensors": sensors})
 
 @csrf_exempt
 def sensor_data(request):

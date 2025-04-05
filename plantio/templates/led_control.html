@@ -26,6 +26,14 @@
       <p>Status do LED: <span id="ledStatus">{% if status %}Ligado{% else %}Desligado{% endif %}</span></p>
     </form>
 
+    [% for sensor in sensors %]
+      <div>
+        <h2>Sensor {{ sensor.id }}</h2>
+        <p>Umidade: {{ sensor.humidity }}%</p>
+        <p>Temperatura: {{ sensor.temperature }}°C</p>
+        <p>Temperatura da solução: {{ sensor.solution_temperature }}°C</p>
+      </div>
+    [% endfor %]
     <script>
       $(document).ready(function() {
           function getCSRFToken() {
