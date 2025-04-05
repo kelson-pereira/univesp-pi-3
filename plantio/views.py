@@ -1,7 +1,8 @@
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from django.views.generic.base import RedirectView
 from django.http import JsonResponse
-from .models import Led
+from .models import Led, Device, SensorType, Sensor
 
 # Crie suas visualizações aqui.
 
