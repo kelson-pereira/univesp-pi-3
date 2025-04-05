@@ -18,7 +18,7 @@ Incluindo outra configuração de URL:
 from django.urls import path
 from django.views.generic import RedirectView
 from plantio import views
-from plantio.views import home, led_status, toggle_led, led_control_view
+from plantio.views import home, led_status, toggle_led, led_control_view, sensor_data
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
