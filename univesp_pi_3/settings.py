@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
     # Remova o comentário e a entrada em `urls.py` se desejar usar o recurso de administração do Django:
     # https://docs.djangoproject.com/en/5.0/ref/contrib/admin/
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',

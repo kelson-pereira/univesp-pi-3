@@ -21,3 +21,14 @@ def toggle_led(request):
 def led_control_view(request):
     led = Led.objects.first()
     return render(request, "led_control.html", {"status": led.status if led else False})
+
+def sensor_data(request):
+    data = request.POST
+    mac_address = data.get('mac')
+    values = {key: float(value) for key, value in data.items() if key != 'mac'}
+    for key, value in values.items():
+        sensor, _ = Sensor.objects.get_or_create(sensor_type=key, device=mac_address)
+        sensor.sensor_value = value
+        sensor.status = True
+        sensor.save()
+    return JsonResponse({"status": "success"})
