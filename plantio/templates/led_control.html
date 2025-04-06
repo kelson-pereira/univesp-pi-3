@@ -39,7 +39,6 @@
       <div class="card-body">
 
         <h2 class="text-center mb-4 fw-bold" style="color: #3CAA35;">Controle Hidropônico</h2>
-
         <!-- Controle do LED -->
         <form class="text-center mb-5">
           {% csrf_token %}
@@ -59,7 +58,7 @@
           {% for sensor in sensors %}
           <div class="col-md-6 col-lg-4 mb-4">
             <div class="card h-100 shadow-sm border-0">
-              <div class="card-body">
+              <div class="card-body bg-light">
                 <div class="d-flex align-items-center mb-2">
                   {% with sensor.sensor_type.name as name %}
                     {% if name == "tmpA" %}
@@ -80,10 +79,9 @@
                   {% endwith %}
                   <h5 class="card-title mb-0" style="color: #F15A24;">{{ sensor.sensor_type.description }}</h5>
                 </div>
-                <p class="card-text fs-4 fw-bold">
-                  {{ sensor.value|floatformat:1 }} <small class="text-muted">{{ sensor.sensor_type.unit }}</small>
+                <p class="card-text fs-3 fw-semibold">
+                  {{ sensor.value|floatformat:1 }} <small class="fw-light">{{ sensor.sensor_type.unit }}</small> <small class="text-muted fs-6 fw-light">({{ sensor.updated_at|timesince }} atrás)</small>
                 </p>
-                <p class="text-muted small mb-0">Atualizado {{ sensor.updated_at|timesince }} atrás</p>
               </div>
             </div>
           </div>
