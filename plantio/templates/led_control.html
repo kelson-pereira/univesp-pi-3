@@ -81,7 +81,7 @@
                   <h5 class="card-title mb-0" style="color: #F15A24;">{{ sensor.sensor_type.description }}</h5>
                 </div>
                 <p class="card-text fs-4 fw-bold">
-                  {{ sensor.value }} <small class="text-muted">{{ sensor.sensor_type.unit }}</small>
+                  {{ sensor.value|floatformat:1 }} <small class="text-muted">{{ sensor.sensor_type.unit }}</small>
                 </p>
                 <p class="text-muted small mb-0">Atualizado {{ sensor.updated_at|timesince }} atrás</p>
               </div>
