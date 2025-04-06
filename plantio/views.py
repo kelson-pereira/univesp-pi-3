@@ -16,7 +16,12 @@ def home(request):
 def dashboard(request, id):
     led = Led.objects.first()
     sensors = Sensor.objects.filter(device_id=id)
-    return render(request, "dashboard.html", {"led": led, "device_id": id, "sensors": sensors})
+    return render(request, "dashboard.html", {
+        "led": led,
+        "device_id": id,
+        "status": led.status if led else False,
+        "sensors": sensors
+    })
 
 def led_status(request):
     led = Led.objects.first()
