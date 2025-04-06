@@ -1,3 +1,4 @@
+import json
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from django.views.generic.base import RedirectView
@@ -22,16 +23,20 @@ def toggle_led(request):
 def led_control_view(request):
     led = Led.objects.first()
     sensors = Sensor.objects.all()
-    return render(request, "led_control.html", {"status": led.status if led else False}, {"sensors": sensors})
+    return render(request, "led_control.html", {"led": led, "sensors": sensors})
 
 @csrf_exempt
 def sensor_data(request):
-    data = request.POST
-    mac_address = data.get('mac')
-    values = {key: float(value) for key, value in data.items() if key != 'mac'}
-    for key, value in values.items():
-        sensor, _ = Sensor.objects.get_or_create(sensor_type=key, device=mac_address)
-        sensor.sensor_value = value
-        sensor.status = True
-        sensor.save()
-    return JsonResponse({"status": "success"})
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        mac_address = data.get('mac')
+        device, _ = Device.objects.get_or_create(mac_address=mac_address)
+        values = {key: float(value) for key, value in data.items() if key != 'mac'}
+        for key, value in values.items():
+            sensor_type, _ = SensorType.objects.get_or_create(name=key)
+            sensor, created = Sensor.objects.get_or_create(sensor_type=sensor_type, device=device, defaults={'value': value, 'status': True})
+            if not created:
+                sensor.value = value
+                sensor.status = True
+                sensor.save()
+        return JsonResponse({"status": "success"})

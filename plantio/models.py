@@ -8,12 +8,12 @@ class Led(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 class Device(models.Model):
-    mac_address = models.CharField(max_length=17, unique=True)
+    mac_address = models.CharField(primary_key=True, max_length=17, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 class SensorType(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(primary_key=True, max_length=50)
     description = models.TextField()
     unit = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
