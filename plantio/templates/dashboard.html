@@ -100,8 +100,10 @@
 
   <script>
     $(document).ready(function () {
+      const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+
       const socket = new WebSocket(
-        'ws://' + window.location.host + '/ws/dashboard/'
+        `${wsScheme}://` + window.location.host + `/ws/dashboard/`
       );
 
       socket.onmessage = function(e) {

@@ -97,8 +97,10 @@
 
   <script>
     $(document).ready(function () {
+      const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+
       const socket = new WebSocket(
-        'ws://' + window.location.host + '/ws/led-control/'
+        `${wsScheme}://` + window.location.host + `/ws/led-control/`
       );
 
       socket.onmessage = function(e) {
