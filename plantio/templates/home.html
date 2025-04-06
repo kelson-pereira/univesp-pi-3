@@ -1,8 +1,9 @@
 {% load static %}
 <!doctype html>
-<html lang="en" class="h-100">
+<html lang="pt-br">
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1">
         <!-- Favicon -->
         <link rel="icon" type="image/x-icon" href="{% static 'imagens/favicon.ico' %}">
         <link rel="icon" type="image/png" href="{% static 'imagens/favicon.png' %}">
@@ -16,9 +17,24 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <title>plantio</title>
     </head>
-    <body class="h-100 bg-light">
-        <div class="h-100 d-flex align-items-center justify-content-center">
-            <img src="{% static 'imagens/plantio.svg' %}" class="h-25" alt="plantio">
+    <body class="bg-light">
+        <div class="container py-5">
+
+            <!-- Logo -->
+            <div class="text-center mb-4">
+                <img src="{% static 'imagens/plantio.svg' %}" alt="Plantio Hidroponia" style="height: 160px;" />
+            </div>
+            <div class="text-center mb-3 text-muted">Dispositivos</div>
+            {% for device in devices %}
+            <div class="card bg-white shadow border-0 rounded mx-auto" style="width: 20rem;">
+                <div class="card-body">
+                    <h5 class="card-title mb-2 fs-5"><i class="bi bi-cpu-fill me-1"></i>{{device.mac_address}}</h5>
+                    <p><i class="bi bi-calendar-event"></i><span class="lh-sm fw-normal"> Criado em: {{device.created_at}}</span></p>
+                    <p class="mb-1"><i class="bi bi-clock"></i><span class="lh-sm fw-normal"> Última atualização, {{device.updated_at|timesince}}</span></p>
+                    <a class="btn btn-dark float-end" href="{% url 'dashboard' id=device.mac_address %}">Dashboard</a>
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </body>
 </html>

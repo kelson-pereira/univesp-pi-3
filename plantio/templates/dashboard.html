@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    .form-switch .form-check-input {
+      width: 4rem;
+      height: 2rem;
+      background-color: #adb5bd; /* cinza quando desligado */
+      border-color: #adb5bd;
+    }
+    .form-switch .form-check-input:checked {
+      background-color: #3CAA35 !important;
+      border-color: #3CAA35 !important;
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+  <div class="container py-5">
+
+    <!-- Logo -->
+    <div class="text-center mb-4">
+      <img src="{% static 'imagens/plantio.svg' %}" alt="Plantio Hidroponia" style="height: 80px;" />
+    </div>
+
+    <div class="text-center mb-3 text-muted"><a href="{% url 'home' %}">Dispositivos</a> > {{ device_id }}</div>
+
+    <!-- Card Principal -->
+    <div class="card shadow-lg rounded-4 border-0 bg-white">
+      <div class="card-body">
+
+        <h2 class="text-center mb-4 fw-bold" style="color: #3CAA35;">Controle Hidropônico</h2>
+
+        <!-- Controle do LED -->
+        <form class="text-center mb-5">
+          {% csrf_token %}
+          <div class="form-check form-switch d-inline-flex align-items-center justify-content-center mb-2">
+            <input class="form-check-input me-2" type="checkbox" id="ledSwitch" {% if status %}checked{% endif %}>
+            <label class="form-check-label fw-semibold" for="ledSwitch">Lâmpada LED Grow</label>
+          </div>
+          <p class="fw-semibold">
+            Status: 
+            <span id="ledStatus" style="color: #F15A24;">{% if status %}Ligado{% else %}Desligado{% endif %}</span>
+          </p>
+        </form>
+
+        <!-- Sensores -->
+        <h4 class="mb-4 text-center text-muted">Sensores registrados</h4>
+        <div class="row">
+          {% for sensor in sensors %}
+          <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm border-0">
+              <div class="card-body bg-light">
+                <div class="d-flex align-items-center mb-2">
+                  {% with sensor.sensor_type.name as name %}
+                    {% if name == "tmpA" %}
+                      <i class="bi bi-thermometer-half fs-4 me-2" style="color: #F15A24;"></i>
+                    {% elif name == "umdA" %}
+                      <i class="bi bi-droplet-half fs-4 me-2" style="color: #F15A24;"></i>
+                    {% elif name == "ph" %}
+                      <i class="bi bi-beaker fs-4 me-2" style="color: #F15A24;"></i>
+                    {% elif name == "lht" %}
+                      <i class="bi bi-brightness-high fs-4 me-2" style="color: #F15A24;"></i>
+                    {% elif name == "lvl" %}
+                      <i class="bi bi-cup-straw fs-4 me-2" style="color: #F15A24;"></i>
+                    {% elif name == "tmpS" %}
+                      <i class="bi bi-thermometer-half fs-4 me-2" style="color: #F15A24;"></i>
+                    {% else %}
+                      <i class="bi bi-speedometer2 fs-4 me-2" style="color: #F15A24;"></i>
+                    {% endif %}
+                  {% endwith %}
+                  <h5 class="card-title mb-0" style="color: #F15A24;">{{ sensor.sensor_type.description }}</h5>
+                </div>
+                <p class="card-text fs-3 fw-semibold">
+                  {{ sensor.value|floatformat:1 }} <small class="fw-light">{{ sensor.sensor_type.unit }}</small> <small class="text-muted fs-6 fw-light">({{ sensor.updated_at|timesince }} atrás)</small>
+                </p>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    $(document).ready(function () {
+      function getCSRFToken() {
+        return $("input[name=csrfmiddlewaretoken]").val();
+      }
+
+      $.get("/led/status/", function (data) {
+        $("#ledSwitch").prop("checked", data.status);
+        $("#ledStatus").text(data.status ? "Ligado" : "Desligado");
+      });
+
+      $("#ledSwitch").change(function () {
+        $.ajax({
+          url: "/led/toggle/",
+          type: "POST",
+          headers: { "X-CSRFToken": getCSRFToken() },
+          success: function (data) {
+            $("#ledStatus").text(data.led ? "Ligado" : "Desligado");
+          },
+          error: function (xhr, status, error) {
+            console.log("Erro na requisição:", error);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

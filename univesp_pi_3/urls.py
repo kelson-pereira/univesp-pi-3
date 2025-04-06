@@ -28,4 +28,5 @@ urlpatterns = [
     path('led/toggle/', views.toggle_led, name='toggle_led'),
     path('led/control/', views.led_control_view, name='led_control'),
     path('sensors/', views.sensor_data, name='sensor_data'),
+    path('dashboard/<str:id>/', views.dashboard, name='dashboard'),
 ]

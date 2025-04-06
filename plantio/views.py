@@ -8,7 +8,13 @@ from .models import Led, Device, SensorType, Sensor
 # Crie suas visualizações aqui.
 
 def home(request):
-    return render(request, 'home.html')
+    devices = Device.objects.all()
+    return render(request, 'home.html', {"devices": devices})
+
+def dashboard(request, id):
+    led = Led.objects.first()
+    sensors = Sensor.objects.filter(device_id=id)
+    return render(request, "dashboard.html", {"led": led, "device_id": id, "sensors": sensors})
 
 def led_status(request):
     led = Led.objects.first()
