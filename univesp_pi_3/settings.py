@@ -64,7 +64,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'plantio'
+    'plantio',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -102,7 +103,18 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'univesp_pi_3.wsgi.application'
+ASGI_APPLICATION = 'univesp_pi_3.asgi.application'
 
+REDIS_URL = os.environ.get('REDISCLOUD_URL', 'redis://127.0.0.1:6379')
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [REDIS_URL],
+        },
+    },
+}
 
 # Banco de dados
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

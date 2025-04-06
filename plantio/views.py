@@ -4,6 +4,8 @@ from django.shortcuts import render
 from django.views.generic.base import RedirectView
 from django.http import JsonResponse
 from .models import Led, Device, SensorType, Sensor
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 # Crie suas visualizações aqui.
 
@@ -14,7 +16,12 @@ def home(request):
 def dashboard(request, id):
     led = Led.objects.first()
     sensors = Sensor.objects.filter(device_id=id)
-    return render(request, "dashboard.html", {"led": led, "device_id": id, "sensors": sensors})
+    return render(request, "dashboard.html", {
+        "led": led,
+        "device_id": id,
+        "status": led.status if led else False,
+        "sensors": sensors
+    })
 
 def led_status(request):
     led = Led.objects.first()
@@ -24,12 +31,25 @@ def toggle_led(request):
     led, _ = Led.objects.get_or_create(id=1)
     led.status = not led.status
     led.save()
+
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        "led_control",
+        {
+            "type": "led_status_update",
+            "status": led.status
+        }
+    )
     return JsonResponse({"led": led.status})
 
 def led_control_view(request):
     led = Led.objects.first()
     sensors = Sensor.objects.all()
-    return render(request, "led_control.html", {"led": led, "sensors": sensors})
+    return render(request, "led_control.html", {
+        "led": led,
+        "status": led.status if led else False,
+        "sensors": sensors
+    })
 
 @csrf_exempt
 def sensor_data(request):
