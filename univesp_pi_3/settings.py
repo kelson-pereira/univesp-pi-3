@@ -105,11 +105,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'univesp_pi_3.wsgi.application'
 ASGI_APPLICATION = 'univesp_pi_3.asgi.application'
 
+REDIS_URL = os.environ.get('REDISCLOUD_URL', 'redis://127.0.0.1:6379')
+
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+            "hosts": [REDIS_URL],
         },
     },
 }
