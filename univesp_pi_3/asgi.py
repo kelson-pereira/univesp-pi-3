@@ -17,13 +17,13 @@ from channels.auth import AuthMiddlewareStack
 
 import plantio.routing
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'univesp_pi_3.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "univesp_pi_3.settings")
 
-application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
-    "websocket": AuthMiddlewareStack(
-        URLRouter(
-            plantio.routing.websocket_urlpatterns
-        )
-    ),
-})
+application = ProtocolTypeRouter(
+    {
+        "http": get_asgi_application(),
+        "websocket": AuthMiddlewareStack(
+            URLRouter(plantio.routing.websocket_urlpatterns)
+        ),
+    }
+)

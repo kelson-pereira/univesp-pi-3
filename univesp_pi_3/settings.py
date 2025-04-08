@@ -23,13 +23,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Os arquivos de mídia enviados pelo usuário dependem de duas configurações:
 MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR,"media/")
+MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 
 # Configurações de desenvolvimento de início rápido – inadequadas para produção
 # Consulte https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # AVISO DE SEGURANÇA: mantenha em segredo a chave secreta usada na produção!
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", default=secrets.token_urlsafe(nbytes=64))
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY", default=secrets.token_urlsafe(nbytes=64)
+)
 
 # A variável de ambiente `DYNO` está definida na Heroku CI, mas não é um aplicativo Heroku real,
 # então também temos que excluir explicitamente o CI:
@@ -40,13 +42,13 @@ IS_HEROKU_APP = "DYNO" in os.environ and not "CI" in os.environ
 if not IS_HEROKU_APP:
     DEBUG = True
 
-# Na Heroku, é seguro usar um curinga para `ALLOWED_HOSTS`, pois o roteador Heroku realiza 
+# Na Heroku, é seguro usar um curinga para `ALLOWED_HOSTS`, pois o roteador Heroku realiza
 # a validação do cabeçalho Host na solicitação HTTP recebida. Em outras plataformas,
 # você pode precisar listar explicitamente os nomes de host esperados para evitar ataques
 # de cabeçalho de host HTTP. Veja:
 # https://docs.djangoproject.com/en/5.0/ref/settings/#std-setting-ALLOWED_HOSTS
 if IS_HEROKU_APP:
-    ALLOWED_HOSTS = ['*']
+    ALLOWED_HOSTS = ["*"]
     SECURE_SSL_REDIRECT = False
 else:
     ALLOWED_HOSTS = ["127.0.0.1"]
@@ -55,62 +57,62 @@ else:
 
 INSTALLED_APPS = [
     # Use a implementação runserver do WhiteNoise em vez do padrão do Django, para paridade dev-prod.
-    'whitenoise.runserver_nostatic',
+    "whitenoise.runserver_nostatic",
     # Remova o comentário e a entrada em `urls.py` se desejar usar o recurso de administração do Django:
     # https://docs.djangoproject.com/en/5.0/ref/contrib/admin/
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'plantio',
-    'channels',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "plantio",
+    "channels",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
+    "django.middleware.security.SecurityMiddleware",
     # O Django não suporta servir ativos estáticos de maneira pronta para produção, então
     # usamos o excelente pacote WhiteNoise para fazer isso. O middleware WhiteNoise deve ser
     # listado após o `SecurityMiddleware` do Django para que os redirecionamentos de segurança
     # ainda sejam executados.
     # Veja: https://whitenoise.readthedocs.io
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'univesp_pi_3.urls'
+ROOT_URLCONF = "univesp_pi_3.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'univesp_pi_3.wsgi.application'
-ASGI_APPLICATION = 'univesp_pi_3.asgi.application'
+WSGI_APPLICATION = "univesp_pi_3.wsgi.application"
+ASGI_APPLICATION = "univesp_pi_3.asgi.application"
 
-REDIS_URL = os.environ.get('REDISCLOUD_URL', 'redis://127.0.0.1:6379')
+REDIS_URL = os.environ.get("REDISCLOUD_URL", "redis://127.0.0.1:6379")
 
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
             "hosts": [REDIS_URL],
         },
     },
@@ -137,9 +139,9 @@ else:
     # será usado para simplificar a configuração inicial. A longo prazo, é recomendado usar o
     # Postgres localmente também.
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 
@@ -149,16 +151,16 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -166,22 +168,22 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internacionalização
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'pt-br'
+LANGUAGE_CODE = "pt-br"
 
-TIME_ZONE = 'America/Sao_Paulo'
+TIME_ZONE = "America/Sao_Paulo"
 
 USE_I18N = True
 
 USE_TZ = True
 
 # Utiliza cookies de sessão do usuário
-SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies" 
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 # Arquivos estáticos (CSS, JavaScript, Imagens)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_URL = "/static/"
 
 # Não armazene a versão original (nome de arquivo sem hash) de arquivos estáticos, para reduzir o tamanho do slug:
 # https://whitenoise.readthedocs.io/en/latest/django.html#WHITENOISE_KEEP_ONLY_HASHED_FILES
@@ -191,6 +193,6 @@ WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 # Tipo de campo de chave primária padrão
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 django_heroku.settings(locals(), staticfiles=False)
