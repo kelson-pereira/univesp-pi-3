@@ -13,6 +13,7 @@ def home(request):
     devices = Device.objects.all()
     return render(request, 'home.html', {"devices": devices})
 
+@csrf_exempt
 def dashboard(request, id):
     led = Led.objects.first()
     sensors = Sensor.objects.filter(device_id=id)
@@ -27,6 +28,7 @@ def led_status(request):
     led = Led.objects.first()
     return JsonResponse({'status': led.status})
 
+@csrf_exempt
 def toggle_led(request):
     led, _ = Led.objects.get_or_create(id=1)
     led.status = not led.status
@@ -42,6 +44,7 @@ def toggle_led(request):
     )
     return JsonResponse({"led": led.status})
 
+@csrf_exempt
 def led_control_view(request):
     led = Led.objects.first()
     sensors = Sensor.objects.all()
