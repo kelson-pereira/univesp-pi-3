@@ -1,4 +1,4 @@
-from .models import SensorType
+from .models import SensorType, ControlType
 
 
 def create_sensor_type(sender, **kwargs):
@@ -15,3 +15,11 @@ def create_sensor_type(sender, **kwargs):
         SensorType.objects.get_or_create(
             name=sensor["name"], description=sensor["description"], unit=sensor["unit"]
         )
+
+def create_control_type(sender, **kwargs):
+    control_types = [
+        {"name": "light", "description": "Lampada LED Grow"},
+        {"name": "pump", "description": "Compressor Aerador"}
+    ]
+    for control in control_types:
+        ControlType.objects.get_or_create(name=control['name'],description=control['description'])

@@ -1,8 +1,9 @@
 import json
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import Led, Device, SensorType, Sensor
+from .models import Led, Device, SensorType, Sensor, ControlType, Control
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
@@ -17,6 +18,7 @@ def home(request):
 @csrf_exempt
 def dashboard(request, id):
     led = Led.objects.first()
+    controls = Control.objects.filter(device_id=id)
     sensors = Sensor.objects.filter(device_id=id)
     return render(
         request,
@@ -25,9 +27,63 @@ def dashboard(request, id):
             "led": led,
             "device_id": id,
             "status": led.status if led else False,
+            "controls": controls,
             "sensors": sensors,
         },
     )
+
+
+@csrf_exempt
+def controls(request):
+    if request.method == 'GET':
+        data = json.loads(request.body)
+        mac_address = data.get('mac')
+        device, _ = Device.objects.get_or_create(mac_address=mac_address)
+        controls = Control.objects.filter(device_id=mac_address)
+        response_json = {}
+        for control in controls:
+            status = get_control_status(control)
+            response_json[control.control_type.name] = status
+        return JsonResponse(response_json)
+    elif request.method == 'POST':
+        data = json.loads(request.body)
+        mac_address = data.get('mac')
+        device, _ = Device.objects.get_or_create(mac_address=mac_address)
+        for control in data['controls']:
+            control_type = ControlType.objects.get(name=control.get('type'))
+            Control.objects.update_or_create(
+                device=device,
+                control_type=control_type,
+                defaults={
+                    'schedule_enabled': control.get('schedule_enabled', False),
+                    'start_time': control.get('start_time'),
+                    'interval_on_minutes': control.get('interval_on_minutes'),
+                    'interval_off_minutes': control.get('interval_off_minutes'),
+                    'repeat_count': control.get('repeat_count', 0)
+                }
+            )
+        return JsonResponse({'status': 'success'})
+
+def get_control_status(control):
+    current_time = timezone.now().time()
+    if not control.schedule_enabled:
+        return 0
+    start_minutes = control.start_time.hour * 60 + control.start_time.minute
+    current_minutes = current_time.hour * 60 + current_time.minute
+    if current_minutes < start_minutes:
+        return 0 # se ainda não chegou no horário de início
+    elapsed_minutes = current_minutes - start_minutes
+    # se não há intervalo desligado (ciclo contínuo)
+    if not control.interval_off_minutes:
+        return 1 if elapsed_minutes < control.interval_on_minutes else 0
+    # ciclo completo
+    total_cycle = control.interval_on_minutes + control.interval_off_minutes
+    # se não há repetições ou ainda está dentro do número de ciclos
+    if control.repeat_count == 0 or \
+       (elapsed_minutes // total_cycle) < control.repeat_count:
+        cycle_position = elapsed_minutes % total_cycle
+        return 1 if cycle_position < control.interval_on_minutes else 0
+    return 0 # se excedeu o número de repetições
 
 
 def led_status(request):

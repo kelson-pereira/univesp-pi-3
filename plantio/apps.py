@@ -7,6 +7,7 @@ class PlantioConfig(AppConfig):
     name = "plantio"
 
     def ready(self):
-        from .signals import create_sensor_type
+        from .signals import create_sensor_type, create_control_type
 
         post_migrate.connect(create_sensor_type, sender=self)
+        post_migrate.connect(create_control_type, sender=self)
