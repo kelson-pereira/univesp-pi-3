@@ -12,12 +12,14 @@ from asgiref.sync import async_to_sync
 
 def home(request):
     devices = Device.objects.all()
+    print('OK' + str(devices.count()))
     return render(request, "home.html", {"devices": devices})
 
 
 @csrf_exempt
 def dashboard(request, id):
     led = Led.objects.first()
+    device = Device.objects.get(mac_address=id)
     controls = Control.objects.filter(device_id=id)
     sensors = Sensor.objects.filter(device_id=id)
     return render(
@@ -25,8 +27,8 @@ def dashboard(request, id):
         "dashboard.html",
         {
             "led": led,
-            "device_id": id,
             "status": led.status if led else False,
+            "device": device,
             "controls": controls,
             "sensors": sensors,
         },
@@ -55,6 +57,7 @@ def controls(request):
                 device=device,
                 control_type=control_type,
                 defaults={
+                    'status': control.get('status', False),
                     'schedule_enabled': control.get('schedule_enabled', False),
                     'start_time': control.get('start_time'),
                     'interval_on_minutes': control.get('interval_on_minutes'),

@@ -14,14 +14,34 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <style>
     .form-switch .form-check-input {
+      cursor: pointer;
       width: 4rem;
       height: 2rem;
       background-color: #adb5bd; /* cinza quando desligado */
       border-color: #adb5bd;
     }
     .form-switch .form-check-input:checked {
-      background-color: #3CAA35 !important;
-      border-color: #3CAA35 !important;
+      background-color: #3caa35 !important;
+      border-color: #3caa35 !important;
+    }
+    .icon-container {
+      cursor: pointer;
+    }
+    .default-icon {
+      display: inline;
+      color: #6c757d;
+      transition: all 0.3s ease;
+    }
+    .hover-icon {
+      display: none;
+      color: #3caa35;
+      transition: all 0.3s ease;
+    }
+    .icon-container:hover .default-icon {
+      display: none;
+    }
+    .icon-container:hover .hover-icon {
+      display: inline;
     }
   </style>
 </head>
@@ -31,16 +51,18 @@
 
     <!-- Logo -->
     <div class="text-center mb-4">
-      <img src="{% static 'imagens/plantio.svg' %}" alt="Plantio Hidroponia" style="height: 80px;" />
+      <img src="{% static 'imagens/plantio.svg' %}" alt="Plantio Hidroponia" style="height: 6rem;" />
     </div>
 
-    <div class="text-center mb-3 text-muted"><a href="{% url 'home' %}">Dispositivos</a> <i class="bi bi-chevron-right"></i> {{ device_id }}</div>
+    <div class="text-center mb-3 text-muted"><a href="{% url 'home' %}">Dispositivos</a> <i class="bi bi-chevron-right"></i> {{ device.mac_address }}</div>
 
     <!-- Card Principal -->
     <div class="card shadow-lg rounded-4 border-0 bg-white">
       <div class="card-body">
 
-        <h2 class="text-center mb-4 fw-bold" style="color: #3CAA35;">Controle Hidropônico</h2>
+        <h2 class="text-center mb-1 fw-bold" style="color: #3caa35;">Controle Hidropônico</h2>
+
+        <p class="text-center mb-3"><i class="bi bi-clock"></i><span class="lh-sm fw-normal"> Atualizado {{ device.updated_at|timesince }} atrás</span></p>
 
         <!-- Controle do LED -->
         <form class="text-center mb-2">
@@ -56,10 +78,10 @@
         </form>
 
         <!-- Controles -->
-        <h4 class="text-center mb-3 text-muted">Controles registrados</h4>
+        <h4 class="text-center mb-3 text-muted">Controles</h4>
         <div class="d-flex flex-wrap justify-content-center gap-4 mb-3">
           {% for control in controls %}
-            <div class="card h-100 shadow-sm border-0" style="width: 20rem;">
+            <div class="card h-100 shadow-sm border-0" style="width: 22rem;">
               <div class="card-body bg-light">
                 <div class="d-flex align-items-center mb-2 justify-content-between">
                   <div class="d-flex align-items-center">
@@ -74,33 +96,25 @@
                     {% endwith %}
                     <h5 class="card-title mb-0" style="color: #F15A24;">{{ control.control_type.description }}</h5>
                   </div>
-                  <i class="bi bi-floppy fs-4 me-2"></i>
+                  <div class="d-flex align-items-center">
+                    <a class="icon-container" href="#">
+                      <i class="bi bi-pencil fs-4 default-icon"></i>
+                      <i class="bi bi-pencil-fill fs-4 hover-icon"></i>
+                    </a>
+                  </div>
                 </div>
                 <div class="card-text d-flex flex-column">
-                  <div class="form-check form-switch d-inline-flex align-items-center mb-2">
-                    <input class="form-check-input me-2" type="checkbox" id="ledSwitch" {% if control.schedule_enabled %}checked{% endif %}>
-                    <label class="form-check-label fw-semibold" for="ledSwitch">Agendado</label>
-                  </div>
-                  <div class="card-text d-flex flex-row gap-2">
-                    <div class="form-floating mb-2">
-                      <input type="email" class="form-control" id="floatingInput" value="{{ control.start_time }}">
-                      <label for="floatingInput">Hora inicial</label>
+                  <div class="d-flex flex-row justify-content-between">
+                    <div class="form-check form-switch d-inline-flex align-items-center mb-2">
+                      <input class="form-check-input me-2" type="checkbox" id="ledSwitch" {% if control.schedule_enabled %}checked{% endif %}>
+                      <label class="form-check-label fw-semibold" for="ledSwitch">Agendado</label>
                     </div>
-                    <div class="form-floating mb-2">
-                      <input type="email" class="form-control" id="floatingInput" value="{{ control.repeat_count }}">
-                      <label for="floatingInput">Repetições:</label>
+                    <div class="form-check form-switch d-inline-flex align-items-center mb-2">
+                      <input class="form-check-input me-2" type="checkbox" id="ledSwitch" {% if control.status %}checked{% endif %}>
+                      <label class="form-check-label fw-semibold" for="ledSwitch">Ligado</label>
                     </div>
                   </div>
-                  <div class="card-text d-flex flex-row gap-2">
-                    <div class="form-floating mb-2">
-                      <input type="email" class="form-control" id="floatingInput" value="{{ control.interval_on_minutes }}">
-                      <label for="floatingInput">Minutos ligado:</label>
-                    </div>
-                    <div class="form-floating mb-2">
-                      <input type="email" class="form-control" id="floatingInput" value="{{ control.interval_off_minutes }}">
-                      <label for="floatingInput">Minutos desligado:</label>
-                    </div>
-                  </div>
+                  <div class="fs-6 text-muted">Iniciar às <b>{{ control.start_time }}</b>, ligar por <b>{{ control.interval_on_minutes }} minutos</b>, desligar por <b>{{ control.interval_off_minutes }} minutos</b>, repetir <b>{{ control.repeat_count }} vezes</b>.</div>
                 </div>
               </div>
             </div>
@@ -108,34 +122,34 @@
         </div>
 
         <!-- Sensores -->
-        <h4 class="text-center mb-3 text-muted">Sensores registrados</h4>
-        <div class="d-flex flex-wrap justify-content-center gap-4">
+        <h4 class="text-center mb-3 text-muted">Sensores</h4>
+        <div class="d-flex flex-wrap justify-content-center gap-4 mb-3">
           {% for sensor in sensors %}
-            <div class="card h-100 shadow-sm border-0" style="width: 20rem;">
+            <div class="card shadow-sm border-0" style="width: 14.2rem; height: 8.5rem;">
               <div class="card-body bg-light">
                 <div class="d-flex align-items-center mb-2">
                   {% with sensor.sensor_type.name as name %}
                     {% if name == "tmpA" %}
-                      <i class="bi bi-thermometer-half fs-4 me-2" style="color: #F15A24;"></i>
+                      <i class="bi bi-thermometer-half fs-2 me-2" style="color: #F15A24;"></i>
                     {% elif name == "umdA" %}
-                      <i class="bi bi-droplet-half fs-4 me-2" style="color: #F15A24;"></i>
+                      <i class="bi bi-droplet-half fs-2 me-2" style="color: #F15A24;"></i>
                     {% elif name == "ph" %}
-                      <i class="bi bi-beaker fs-4 me-2" style="color: #F15A24;"></i>
+                      <i class="bi bi-beaker fs-2 me-2" style="color: #F15A24;"></i>
                     {% elif name == "lht" %}
-                      <i class="bi bi-brightness-high fs-4 me-2" style="color: #F15A24;"></i>
+                      <i class="bi bi-brightness-high fs-2 me-2" style="color: #F15A24;"></i>
                     {% elif name == "lvl" %}
-                      <i class="bi bi-cup-straw fs-4 me-2" style="color: #F15A24;"></i>
+                      <i class="bi bi-cup-straw fs-2 me-2" style="color: #F15A24;"></i>
                     {% elif name == "tmpS" %}
-                      <i class="bi bi-thermometer-half fs-4 me-2" style="color: #F15A24;"></i>
+                      <i class="bi bi-thermometer-half fs-2 me-2" style="color: #F15A24;"></i>
                     {% else %}
-                      <i class="bi bi-speedometer2 fs-4 me-2" style="color: #F15A24;"></i>
+                      <i class="bi bi-speedometer2 fs-2 me-2" style="color: #F15A24;"></i>
                     {% endif %}
-                  {% endwith %}
-                  <h5 class="card-title mb-0" style="color: #F15A24;">{{ sensor.sensor_type.description }}</h5>
+                  {% endwith %}                  
+                  <p class="card-text fs-3 fw-semibold">
+                    {{ sensor.value|floatformat:1 }}{{ sensor.sensor_type.unit }}
+                  </p>
                 </div>
-                <p class="card-text fs-3 fw-semibold">
-                  {{ sensor.value|floatformat:1 }} <small class="fw-light">{{ sensor.sensor_type.unit }}</small> <small class="text-muted fs-6 fw-light">({{ sensor.updated_at|timesince }} atrás)</small>
-                </p>
+                <div class="fs-6 text-muted">{{ sensor.sensor_type.description }}</div>
               </div>
             </div>
           {% endfor %}

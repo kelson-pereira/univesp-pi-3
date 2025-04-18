@@ -43,6 +43,7 @@ class ControlType(models.Model):
 class Control(models.Model):
     control_type = models.ForeignKey(ControlType, on_delete=models.CASCADE)
     device = models.ForeignKey(Device, on_delete=models.CASCADE)
+    status = models.BooleanField(default=False)
     schedule_enabled = models.BooleanField(default=False)
     start_time = models.TimeField(default=time(6,0))
     interval_on_minutes = models.PositiveIntegerField(default=960)  # tempo ligado
