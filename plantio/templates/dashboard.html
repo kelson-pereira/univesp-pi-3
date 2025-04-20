@@ -15,7 +15,7 @@
   <style>
     .form-switch .form-check-input {
       cursor: pointer;
-      width: 4rem;
+      width: 3.5rem;
       height: 2rem;
       background-color: #adb5bd; /* cinza quando desligado */
       border-color: #adb5bd;
@@ -126,7 +126,7 @@
         <div class="d-flex flex-wrap justify-content-center gap-4 mb-3">
           {% for sensor in sensors %}
             <div class="card shadow-sm border-0" style="width: 14.2rem; height: 8.5rem;">
-              <div class="card-body bg-light">
+              <div class="card-body bg-body-secondary">
                 <div class="d-flex align-items-center mb-2">
                   {% with sensor.sensor_type.name as name %}
                     {% if name == "tmpA" %}

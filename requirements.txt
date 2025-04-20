@@ -10,3 +10,5 @@ whitenoise==6.9.0
 channels==4.2.2
 channels_redis==4.2.1
 daphne==4.1.2
+celery==5.5.1
+django-celery-beat==2.8.0

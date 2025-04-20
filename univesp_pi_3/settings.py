@@ -17,6 +17,7 @@ from pathlib import Path
 
 import dj_database_url
 import django_heroku
+from celery.schedules import crontab
 
 # Cria caminhos dentro do projeto como: BASE_DIR/'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -68,6 +69,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "plantio",
     "channels",
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -107,7 +109,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "univesp_pi_3.wsgi.application"
 ASGI_APPLICATION = "univesp_pi_3.asgi.application"
 
-REDIS_URL = os.environ.get("REDISCLOUD_URL", "redis://127.0.0.1:6379")
+REDIS_URL = os.environ.get("REDISCLOUD_URL", "redis://localhost:6379")
 
 CHANNEL_LAYERS = {
     "default": {
@@ -117,6 +119,11 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+# Scheduler controls com Celery
+CELERY_BROKER_URL = os.environ.get("REDISCLOUD_URL", "redis://localhost:6379")
+CELERY_RESULT_BACKEND = os.environ.get("REDISCLOUD_URL", "redis://localhost:6379")
+CELERY_TIMEZONE = 'America/Sao_Paulo'
 
 # Banco de dados
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

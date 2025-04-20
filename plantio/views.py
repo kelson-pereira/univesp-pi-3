@@ -40,7 +40,7 @@ def controls(request):
     if request.method == 'GET':
         data = json.loads(request.body)
         mac_address = data.get('mac')
-        device, _ = Device.objects.get_or_create(mac_address=mac_address)
+        device, _ = Device.objects.update_or_create(mac_address=mac_address)
         controls = Control.objects.filter(device_id=mac_address)
         response_json = {}
         for control in controls:
@@ -50,7 +50,7 @@ def controls(request):
     elif request.method == 'POST':
         data = json.loads(request.body)
         mac_address = data.get('mac')
-        device, _ = Device.objects.get_or_create(mac_address=mac_address)
+        device, _ = Device.objects.update_or_create(mac_address=mac_address)
         for control in data['controls']:
             control_type = ControlType.objects.get(name=control.get('type'))
             Control.objects.update_or_create(
@@ -66,6 +66,7 @@ def controls(request):
                 }
             )
         return JsonResponse({'status': 'success'})
+
 
 def get_control_status(control):
     current_time = timezone.now().time()
@@ -87,6 +88,27 @@ def get_control_status(control):
         cycle_position = elapsed_minutes % total_cycle
         return 1 if cycle_position < control.interval_on_minutes else 0
     return 0 # se excedeu o número de repetições
+
+
+def scheduler_controls(request):
+    controls = Control.objects.filter(schedule_enabled=True)
+    for control in controls:
+        new_status = get_control_status(control)
+        if control.status != new_status:  # só atualiza se mudou
+            control.status = new_status
+            control.save(update_fields=['status'])
+            
+            # notificar via WebSocket
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f"device_{control.device.mac_address.replace(":","-")}",
+                {
+                    "type": "control_status_update",
+                    "control_name": control.control_type.name,
+                    "status": new_status
+                }
+            )
+    return JsonResponse({'status': 'success'})
 
 
 def led_status(request):
@@ -123,7 +145,7 @@ def sensor_data(request):
     if request.method == "POST":
         data = json.loads(request.body)
         mac_address = data.get("mac")
-        device, _ = Device.objects.get_or_create(mac_address=mac_address)
+        device, _ = Device.objects.update_or_create(mac_address=mac_address)
         values = {key: float(value) for key, value in data.items() if key != "mac"}
         for key, value in values.items():
             sensor_type, _ = SensorType.objects.get_or_create(name=key)
