@@ -68,6 +68,54 @@ def controls(request):
         return JsonResponse({'status': 'success'})
 
 
+@csrf_exempt
+def update(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        print(data)
+        mac_address = data.get('mac')
+        device, _ = Device.objects.update_or_create(mac_address=mac_address)
+        for control in data['controls']:
+            control_type = ControlType.objects.get(name=control.get('type'))
+            Control.objects.update_or_create(
+                device=device,
+                control_type=control_type,
+                defaults={
+                    'status': control.get('status', False),
+                    'schedule_enabled': control.get('schedule_enabled', False),
+                    'start_time': control.get('start_time'),
+                    'interval_on_minutes': control.get('interval_on_minutes'),
+                    'interval_off_minutes': control.get('interval_off_minutes'),
+                    'repeat_count': control.get('repeat_count', 0)
+                }
+            )
+        for sensor in data['sensors']:
+            sensor_type = SensorType.objects.get(name=sensor.get('type'))
+            Sensor.objects.update_or_create(
+                device=device,
+                sensor_type=sensor_type,
+                defaults={"value": sensor.get('value'), "status": True},
+            )
+        controls = Control.objects.filter(device_id=mac_address)
+        response_json = {}
+        for control in controls:
+            new_status = get_control_status(control)
+            if control.status != new_status:  # só atualiza se mudou
+                control.status = new_status
+                control.save(update_fields=['status'])
+                channel_layer = get_channel_layer() # notificar via WebSocket
+                async_to_sync(channel_layer.group_send)(
+                    f"device_{control.device.mac_address.replace(":","-")}",
+                    {
+                        "type": "control_status_update",
+                        "control_name": control.control_type.name,
+                        "status": new_status
+                    }
+                )
+            response_json[control.control_type.name] = new_status
+        return JsonResponse(response_json)
+
+
 def get_control_status(control):
     current_time = timezone.now().time()
     if not control.schedule_enabled:

@@ -34,4 +34,5 @@ urlpatterns = [
     path("controls/", views.controls, name='controls'),
     path("sensors/", views.sensor_data, name="sensor_data"),
     path("dashboard/<str:id>/", views.dashboard, name="dashboard"),
+    path("update/", views.update, name="update"),
 ]
