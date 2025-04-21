@@ -20,6 +20,8 @@ class SensorType(models.Model):
     name = models.CharField(primary_key=True, max_length=50)
     description = models.TextField()
     unit = models.CharField(max_length=20)
+    min_value = models.FloatField()
+    max_value = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
