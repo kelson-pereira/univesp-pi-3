@@ -72,30 +72,31 @@ def controls(request):
 def update(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        print(data)
         mac_address = data.get('mac')
         device, _ = Device.objects.update_or_create(mac_address=mac_address)
-        for control in data['controls']:
-            control_type = ControlType.objects.get(name=control.get('type'))
-            Control.objects.update_or_create(
-                device=device,
-                control_type=control_type,
-                defaults={
-                    'status': control.get('status', False),
-                    'schedule_enabled': control.get('schedule_enabled', False),
-                    'start_time': control.get('start_time'),
-                    'interval_on_minutes': control.get('interval_on_minutes'),
-                    'interval_off_minutes': control.get('interval_off_minutes'),
-                    'repeat_count': control.get('repeat_count', 0)
-                }
-            )
-        for sensor in data['sensors']:
-            sensor_type = SensorType.objects.get(name=sensor.get('type'))
-            Sensor.objects.update_or_create(
-                device=device,
-                sensor_type=sensor_type,
-                defaults={"value": sensor.get('value'), "status": True},
-            )
+        if (data.containsKey("controls")):
+            for control in data['controls']:
+                control_type = ControlType.objects.get(name=control.get('type'))
+                Control.objects.update_or_create(
+                    device=device,
+                    control_type=control_type,
+                    defaults={
+                        'status': control.get('status', False),
+                        'schedule_enabled': control.get('schedule_enabled', False),
+                        'start_time': control.get('start_time'),
+                        'interval_on_minutes': control.get('interval_on_minutes'),
+                        'interval_off_minutes': control.get('interval_off_minutes'),
+                        'repeat_count': control.get('repeat_count', 0)
+                    }
+                )
+        if (data.containsKey("sensors")):
+            for sensor in data['sensors']:
+                sensor_type = SensorType.objects.get(name=sensor.get('type'))
+                Sensor.objects.update_or_create(
+                    device=device,
+                    sensor_type=sensor_type,
+                    defaults={"value": sensor.get('value'), "status": True},
+                )
         controls = Control.objects.filter(device_id=mac_address)
         response_json = {}
         for control in controls:
