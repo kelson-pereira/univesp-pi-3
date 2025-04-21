@@ -62,7 +62,16 @@
 
         <h2 class="text-center mb-1 fw-bold" style="color: #3caa35;">Controle Hidropônico</h2>
 
-        <p class="text-center mb-3"><i class="bi bi-clock"></i><span class="lh-sm fw-normal"> Atualizado {{ device.updated_at|timesince }} atrás</span></p>
+        <p class="text-center mb-3"><i class="bi bi-clock"></i>
+          <span class="lh-sm fw-normal">
+            Atualizado 
+            {% if updated_now %}
+              agora
+            {% else %}
+              {{ device.updated_at|timesince }} atrás
+            {% endif %}
+          </span>
+        </p>
 
         <!-- Controle do LED -->
         <form class="text-center mb-2">
