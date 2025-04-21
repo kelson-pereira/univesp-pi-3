@@ -23,18 +23,7 @@ def dashboard(request, id):
     controls = Control.objects.filter(device_id=id)
     sensors = Sensor.objects.filter(device_id=id)
     updated_now = (timezone.now() - device.updated_at).total_seconds() < 60
-    return render(
-        request,
-        "dashboard.html",
-        {
-            "led": led,
-            "status": led.status if led else False,
-            "device": device,
-            "updated_now": updated_now,
-            "controls": controls,
-            "sensors": sensors,
-        },
-    )
+    return render(request, "dashboard.html", {"led": led, "status": led.status if led else False, "device": device, "updated_now": updated_now, "controls": controls, "sensors": sensors})
 
 
 @csrf_exempt

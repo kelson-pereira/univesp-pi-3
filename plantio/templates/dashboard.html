@@ -45,145 +45,127 @@
     }
   </style>
 </head>
-<body class="bg-light">
+<body style="background-color: #c2d0e7;">
 
-  <div class="container pt-5 pb-3">
+  <div class="container pt-4 pb-3">
 
     <!-- Logo -->
     <div class="text-center mb-4">
       <img src="{% static 'imagens/plantio.svg' %}" alt="Plantio Hidroponia" style="height: 6rem;" />
     </div>
 
+      <!-- Caminho de pão -->
     <div class="text-center mb-3 text-muted"><a href="{% url 'home' %}">Dispositivos</a> <i class="bi bi-chevron-right"></i> {{ device.mac_address }}</div>
+    <h2 class="text-center mb-1 fw-bold" style="color: #3caa35;">Controle Hidropônico</h2>
 
-    <!-- Card Principal -->
-    <div class="card shadow-lg rounded-4 border-0 bg-white">
-      <div class="card-body">
+    <!-- Atualizado -->
+    <p class="text-center mb-3">{% if updated_now %}<i class="bi bi-clock">{% else %}<i class="bi bi-clock-fill text-muted">{% endif %}</i>
+      <span class="lh-sm fw-normal">Atualizado {% if updated_now %}agora{% else %}{{ device.updated_at|timesince }} atrás{% endif %}</span>
+    </p>
 
-        <h2 class="text-center mb-1 fw-bold" style="color: #3caa35;">Controle Hidropônico</h2>
-
-        <p class="text-center mb-3"><i class="bi bi-clock"></i>
-          <span class="lh-sm fw-normal">
-            Atualizado 
-            {% if updated_now %}
-              agora
-            {% else %}
-              {{ device.updated_at|timesince }} atrás
-            {% endif %}
-          </span>
-        </p>
-
-        <!-- Controle do LED -->
-        <form class="text-center mb-2">
-          {% csrf_token %}
-          <div class="form-check form-switch d-inline-flex align-items-center justify-content-center mb-2">
-            <input class="form-check-input me-2" type="checkbox" id="ledSwitch" {% if status %}checked{% endif %}>
-            <label class="form-check-label fw-semibold" for="ledSwitch">Lâmpada LED Grow</label>
-          </div>
-          <p class="fw-semibold">
-            Status: 
-            <span id="ledStatus" style="color: #F15A24;">{% if status %}Ligado{% else %}Desligado{% endif %}</span>
-          </p>
-        </form>
-
-        <!-- Controles -->
-        <h4 class="text-center mb-3 text-muted">Controles</h4>
-        <div class="d-flex flex-wrap justify-content-center gap-4 mb-3">
-          {% for control in controls %}
-            <div class="card h-100 shadow-sm border-0" style="width: 22rem;">
-              <div class="card-body bg-light">
-                <div class="d-flex align-items-center mb-2 justify-content-between">
-                  <div class="d-flex align-items-center">
-                    {% with control.control_type.name as name %}
-                      {% if name == "light" %}
-                        <i class="bi bi-brightness-high-fill fs-4 me-2" style="color: #F15A24;"></i>
-                      {% elif name == "pump" %}
-                        <i class="bi bi-fan fs-4 me-2" style="color: #F15A24;"></i>
-                      {% else %}
-                        <i class="bi bi-speedometer2 fs-4 me-2" style="color: #F15A24;"></i>
-                      {% endif %}
-                    {% endwith %}
-                    <h5 class="card-title mb-0" style="color: #F15A24;">{{ control.control_type.description }}</h5>
-                  </div>
-                  <div class="d-flex align-items-center">
-                    <a class="icon-container" href="#">
-                      <i class="bi bi-pencil fs-4 default-icon"></i>
-                      <i class="bi bi-pencil-fill fs-4 hover-icon"></i>
-                    </a>
-                  </div>
-                </div>
-                <div class="card-text d-flex flex-column">
-                  <div class="d-flex flex-row justify-content-between">
-                    <div class="form-check form-switch d-inline-flex align-items-center mb-2">
-                      <input class="form-check-input me-2" type="checkbox" id="ledSwitch" {% if control.schedule_enabled %}checked{% endif %}>
-                      <label class="form-check-label fw-semibold" for="ledSwitch">Agendar</label>
-                    </div>
-                    <div class="form-check form-switch d-inline-flex align-items-center mb-2">
-                      <input class="form-check-input me-2" type="checkbox" id="ledSwitch" {% if control.status %}checked{% endif %}>
-                      <label class="form-check-label fw-semibold" for="ledSwitch">Ligado</label>
-                    </div>
-                  </div>
-                  <div class="fs-6 lh-sm text-muted"><small>Iniciar às <b>{{ control.start_time }}</b>, ligar por <b>{{ control.interval_on_minutes }} minutos</b>, desligar por <b>{{ control.interval_off_minutes }} minutos</b>, repetir <b>{{ control.repeat_count }} vezes</b>.</small></div>
-                </div>
-              </div>
-            </div>
-          {% endfor %}
-        </div>
-
-        <!-- Sensores -->
-        <h4 class="text-center mb-3 text-muted">Sensores</h4>
-        <div class="d-flex flex-wrap justify-content-center gap-4 mb-3">
-          {% for sensor in sensors %}
-            <div class="card shadow-sm bg-body-secondary border-0 flex-row" style="width: 22rem; height: 8.5rem;">
-              <div class="card-body d-flex flex-row">
-                <div class="w-75 me-3">
-                  <div class="d-flex align-items-center mb-2">
-                    {% with sensor.sensor_type.name as name %}
-                      {% if name == "tmpA" %}
-                        <i class="bi bi-thermometer-half fs-2 me-2" style="color: #F15A24;"></i>
-                      {% elif name == "umdA" %}
-                        <i class="bi bi-droplet-half fs-2 me-2" style="color: #F15A24;"></i>
-                      {% elif name == "ph" %}
-                        <i class="bi bi-beaker fs-2 me-2" style="color: #F15A24;"></i>
-                      {% elif name == "lht" %}
-                        <i class="bi bi-brightness-high fs-2 me-2" style="color: #F15A24;"></i>
-                      {% elif name == "lvl" %}
-                        <i class="bi bi-cup-straw fs-2 me-2" style="color: #F15A24;"></i>
-                      {% elif name == "tmpS" %}
-                        <i class="bi bi-thermometer-half fs-2 me-2" style="color: #F15A24;"></i>
-                      {% else %}
-                        <i class="bi bi-speedometer2 fs-2 me-2" style="color: #F15A24;"></i>
-                      {% endif %}
-                    {% endwith %}                  
-                    <div class="fs-6 text-muted lh-sm">{{ sensor.sensor_type.description }}</div>
-                  </div>
-                  <div style="font-size: 36px">
-                    {{ sensor.value|floatformat:1 }}{{ sensor.sensor_type.unit }}
-                    {% if sensor.value > sensor.sensor_type.max_value %}
-                    <i class="bi bi-exclamation-triangle-fill" style="color: #F15A24;"></i>
-                    {% endif %}
-                    {% if sensor.value < sensor.sensor_type.min_value %}
-                    <i class="bi bi-exclamation-triangle-fill" style="color: #F15A24;"></i>
-                    {% endif %}
-                  </div>
-                </div>
-                <div class="w-25 d-flex flex-column justify-content-center align-items-center border-start border-secondary-subtle">
-                  <div class="ms-3">
-                    <div class="fs-6 text-muted"><small>Mín</small></div>
-                    <div class="fs-6 fw-bold">{{ sensor.sensor_type.min_value|floatformat:0 }}{{ sensor.sensor_type.unit }}</div>
-                    <div class="fs-6 text-muted"><small>Máx</small></div>
-                    <div class="fs-6 fw-bold">{{ sensor.sensor_type.max_value|floatformat:0 }}{{ sensor.sensor_type.unit }}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          {% endfor %}
-        </div>
-
+    <!-- Controle do LED -->
+    <form class="text-center mb-2">
+      {% csrf_token %}
+      <div class="form-check form-switch d-inline-flex align-items-center justify-content-center mb-2">
+        <input class="form-check-input me-2" type="checkbox" id="ledSwitch" {% if status %}checked{% endif %}>
+        <label class="form-check-label fw-semibold" for="ledSwitch">Lâmpada LED Grow</label>
       </div>
+      <p class="fw-semibold">
+        Status: 
+        <span id="ledStatus" style="color: #f15a24;">{% if status %}Ligado{% else %}Desligado{% endif %}</span>
+      </p>
+    </form>
+
+    <!-- Controles -->
+    <h4 class="text-center mb-3 text-muted">Controles</h4>
+    <div class="d-flex flex-wrap justify-content-center gap-4 mb-3">
+      {% for control in controls %}
+        <div class="card h-100 bg-body-secondary shadow border-0" style="width: 22rem;">
+          <div class="card-body">
+
+              <div class="d-flex mb-2 align-items-center">
+                {% with control.control_type.name as name %}
+                  {% if name == "light" %}
+                    <i class="bi bi-brightness-high-fill fs-4 me-2" style="color: #F15A24;"></i>
+                  {% elif name == "pump" %}
+                    <i class="bi bi-fan fs-4 me-2" style="color: #F15A24;"></i>
+                  {% else %}
+                    <i class="bi bi-speedometer2 fs-4 me-2" style="color: #F15A24;"></i>
+                  {% endif %}
+                {% endwith %}
+                <h5 class="card-title mb-0" style="color: #F15A24;">{{ control.control_type.description }}</h5>
+              </div>
+
+            <div class="card-text d-flex flex-column">
+              <div class="d-flex flex-row justify-content-between">
+                <div class="form-check form-switch d-inline-flex align-items-center mb-2">
+                  <input class="form-check-input me-2" type="checkbox" id="ledSwitch" {% if control.schedule_enabled %}checked{% endif %}>
+                  <label class="form-check-label fw-semibold" for="ledSwitch">Agendar</label>
+                </div>
+                <div class="form-check form-switch d-inline-flex align-items-center mb-2">
+                  <input class="form-check-input me-2" type="checkbox" id="ledSwitch" {% if control.status %}checked{% endif %}>
+                  <label class="form-check-label fw-semibold" for="ledSwitch">Ligado</label>
+                </div>
+              </div>
+              <div class="fs-6 lh-sm border-top border-secondary-subtle mt-2 pt-2 text-muted"><small>Iniciar às <b>{{ control.start_time }}</b>, ligar por <b>{{ control.interval_on_minutes }} minutos</b>, desligar por <b>{{ control.interval_off_minutes }} minutos</b>, repetir <b>{{ control.repeat_count }} vezes</b>.</small></div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
     </div>
+
+    <!-- Sensores -->
+    <h4 class="text-center mb-3 text-muted">Sensores</h4>
+    <div class="d-flex flex-wrap justify-content-center gap-4 mb-3">
+      {% for sensor in sensors %}
+        <div class="card bg-body-secondary shadow border-0 flex-row" style="width: 22rem; height: 8.5rem;">
+          <div class="card-body d-flex flex-row">
+            <div class="w-75 me-3">
+              <div class="d-flex align-items-center mb-2">
+                {% with sensor.sensor_type.name as name %}
+                  {% if name == "tmpA" %}
+                    <i class="bi bi-thermometer-half fs-2 me-2" style="color: #F15A24;"></i>
+                  {% elif name == "umdA" %}
+                    <i class="bi bi-droplet-half fs-2 me-2" style="color: #F15A24;"></i>
+                  {% elif name == "ph" %}
+                    <i class="bi bi-beaker fs-2 me-2" style="color: #F15A24;"></i>
+                  {% elif name == "lht" %}
+                    <i class="bi bi-brightness-high fs-2 me-2" style="color: #F15A24;"></i>
+                  {% elif name == "lvl" %}
+                    <i class="bi bi-cup-straw fs-2 me-2" style="color: #F15A24;"></i>
+                  {% elif name == "tmpS" %}
+                    <i class="bi bi-thermometer-half fs-2 me-2" style="color: #F15A24;"></i>
+                  {% else %}
+                    <i class="bi bi-speedometer2 fs-2 me-2" style="color: #F15A24;"></i>
+                  {% endif %}
+                {% endwith %}                  
+                <div class="fs-6 text-muted lh-sm">{{ sensor.sensor_type.description }}</div>
+              </div>
+              <div style="font-size: 36px">
+                {{ sensor.value|floatformat:1 }}{{ sensor.sensor_type.unit }}
+                {% if sensor.value > sensor.sensor_type.max_value %}
+                <i class="bi bi-exclamation-triangle-fill" style="color: #F15A24;"></i>
+                {% endif %}
+                {% if sensor.value < sensor.sensor_type.min_value %}
+                <i class="bi bi-exclamation-triangle-fill" style="color: #F15A24;"></i>
+                {% endif %}
+              </div>
+            </div>
+            <div class="w-25 d-flex flex-column justify-content-center align-items-center border-start border-secondary-subtle">
+              <div class="ms-3">
+                <div class="fs-6 text-muted"><small>Mín</small></div>
+                <div class="fs-6 fw-bold">{{ sensor.sensor_type.min_value|floatformat:0 }}{{ sensor.sensor_type.unit }}</div>
+                <div class="fs-6 text-muted"><small>Máx</small></div>
+                <div class="fs-6 fw-bold">{{ sensor.sensor_type.max_value|floatformat:0 }}{{ sensor.sensor_type.unit }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
     <!-- Rodapé -->
-    <div class="text-center py-3 text-muted"><small>UNIVESP Universidade Virtual do Estado de São Paulo • Projeto Integrador em Computação III DRP03 • Grupo 004 - Junho de 2025</small></div>
+    <div class="text-center py-3 text-muted"><small>UNIVESP Universidade Virtual do Estado de São Paulo<br/>Projeto Integrador em Computação III DRP03 • Grupo 004 • Junho de 2025</small></div>
   </div>
 
 
