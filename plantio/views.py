@@ -74,7 +74,7 @@ def update(request):
         data = json.loads(request.body)
         mac_address = data.get('mac')
         device, _ = Device.objects.update_or_create(mac_address=mac_address)
-        if (data.containsKey("controls")):
+        if "controls" in data:
             for control in data['controls']:
                 control_type = ControlType.objects.get(name=control.get('type'))
                 Control.objects.update_or_create(
@@ -89,7 +89,7 @@ def update(request):
                         'repeat_count': control.get('repeat_count', 0)
                     }
                 )
-        if (data.containsKey("sensors")):
+        if "sensors" in data:
             for sensor in data['sensors']:
                 sensor_type = SensorType.objects.get(name=sensor.get('type'))
                 Sensor.objects.update_or_create(
