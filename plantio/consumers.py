@@ -43,10 +43,25 @@ class DashboardConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-    async def dashboard_update(self, event):
+    async def device_update(self, event):
         await self.send(text_data=json.dumps({
-            'type': 'dashboard_update',
+            'type': 'device_update',
+            'updated_now': event['updated_now'],
+            'updated_at': event['updated_at']
+        }))
+
+    async def sensor_update(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'sensor_update',
             'sensor_type': event['sensor_type'],
             'value': event['value'],
+            'status': event['status']
+        }))
+
+    async def control_update(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'control_update',
+            'control_type': event['control_type'],
+            'schedule_enabled': event['schedule_enabled'],
             'status': event['status']
         }))

@@ -65,6 +65,16 @@ def update(request):
         data = json.loads(request.body)
         mac_address = data.get('mac')
         device, _ = Device.objects.update_or_create(mac_address=mac_address)
+        updated_now = (timezone.now() - device.updated_at).total_seconds() < 60
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"dashboard_{device.mac_address.replace(':','-')}",
+            {
+                "type": "device_update",
+                "updated_now": updated_now,
+                "updated_at": device.updated_at.isoformat()
+            }
+        )
         if "controls" in data:
             for control in data['controls']:
                 control_type = ControlType.objects.get(name=control.get('type'))
@@ -93,7 +103,7 @@ def update(request):
                 async_to_sync(channel_layer.group_send)(
                     f"dashboard_{device.mac_address.replace(':','-')}",
                     {
-                        "type": "dashboard_update",
+                        "type": "sensor_update",
                         "sensor_type": sensor_type.name,
                         "value": sensor.get('value'),
                         "status": True
@@ -108,10 +118,11 @@ def update(request):
                 control.save(update_fields=['status'])
                 channel_layer = get_channel_layer() # notificar via WebSocket
                 async_to_sync(channel_layer.group_send)(
-                    f"device_{control.device.mac_address.replace(":","-")}",
+                    f"dashboard_{device.mac_address.replace(':','-')}",
                     {
-                        "type": "control_status_update",
-                        "control_name": control.control_type.name,
+                        "type": "control_update",
+                        "control_type": control.control_type.name,
+                        "schedule_enabled": control.schedule_enabled,
                         "status": new_status
                     }
                 )
@@ -122,23 +133,23 @@ def update(request):
 def get_control_status(control):
     current_time = timezone.now().time()
     if not control.schedule_enabled:
-        return 0
+        return False
     start_minutes = control.start_time.hour * 60 + control.start_time.minute
     current_minutes = current_time.hour * 60 + current_time.minute
     if current_minutes < start_minutes:
-        return 0 # se ainda não chegou no horário de início
+        return False # se ainda não chegou no horário de início
     elapsed_minutes = current_minutes - start_minutes
     # se não há intervalo desligado (ciclo contínuo)
     if not control.interval_off_minutes:
-        return 1 if elapsed_minutes < control.interval_on_minutes else 0
+        return True if elapsed_minutes < control.interval_on_minutes else False
     # ciclo completo
     total_cycle = control.interval_on_minutes + control.interval_off_minutes
     # se não há repetições ou ainda está dentro do número de ciclos
     if control.repeat_count == 0 or \
        (elapsed_minutes // total_cycle) < control.repeat_count:
         cycle_position = elapsed_minutes % total_cycle
-        return 1 if cycle_position < control.interval_on_minutes else 0
-    return 0 # se excedeu o número de repetições
+        return True if cycle_position < control.interval_on_minutes else False
+    return False # se excedeu o número de repetições
 
 
 def scheduler_controls(request):

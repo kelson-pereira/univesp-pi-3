@@ -19,6 +19,7 @@
       height: 2rem;
       background-color: #adb5bd; /* cinza quando desligado */
       border-color: #adb5bd;
+      margin-top: 0;
     }
     .form-switch .form-check-input:checked {
       background-color: #3caa35 !important;
@@ -221,7 +222,7 @@
       // Manipulador de mensagens recebidas
       dashboardSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
-        if (data.type === 'dashboard_update') {
+        if (data.type === 'sensor_update') {
           updateSensors(data.sensor_type, data.value, data.status);
         }
       };
@@ -246,7 +247,6 @@
             if (valueElement) {
               valueElement.textContent = value.toFixed(1);
             }
-            
             // Atualiza ícone de alerta
             const minValue = parseFloat(card.dataset.minValue);
             const maxValue = parseFloat(card.dataset.maxValue);
