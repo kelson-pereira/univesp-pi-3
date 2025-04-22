@@ -88,6 +88,17 @@ def update(request):
                     sensor_type=sensor_type,
                     defaults={"value": sensor.get('value'), "status": True},
                 )
+                # Notificar via WebSocket
+                channel_layer = get_channel_layer()
+                async_to_sync(channel_layer.group_send)(
+                    f"dashboard_{device.mac_address.replace(':','-')}",
+                    {
+                        "type": "dashboard_update",
+                        "sensor_type": sensor_type.name,
+                        "value": sensor.get('value'),
+                        "status": True
+                    }
+                )
         controls = Control.objects.filter(device_id=mac_address)
         response_json = {}
         for control in controls:

@@ -23,3 +23,30 @@ class LedControlConsumer(AsyncWebsocketConsumer):
 
     async def led_status_update(self, event):
         await self.send(text_data=json.dumps({"status": event["status"]}))
+
+
+class DashboardConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.device_mac = self.scope['url_route']['kwargs']['device_mac']
+        self.group_name = f'dashboard_{self.device_mac}'
+
+        await self.channel_layer.group_add(
+            self.group_name,
+            self.channel_name
+        )
+
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(
+            self.group_name,
+            self.channel_name
+        )
+
+    async def dashboard_update(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'dashboard_update',
+            'sensor_type': event['sensor_type'],
+            'value': event['value'],
+            'status': event['status']
+        }))

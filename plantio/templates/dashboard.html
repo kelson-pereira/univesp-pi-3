@@ -124,7 +124,7 @@
     <h4 class="text-center mb-3 text-muted">Sensores</h4>
     <div class="d-flex flex-wrap justify-content-center gap-4 mb-3">
       {% for sensor in sensors %}
-        <div class="card bg-body-secondary shadow border-0 flex-row" style="width: 22rem; height: 8.5rem;">
+        <div class="card bg-body-secondary shadow border-0 flex-row sensor-card sensor-updated" style="width: 22rem; height: 8.5rem;" data-sensor-type="{{ sensor.sensor_type.name }}" data-value="{{ sensor.value }}" data-min-value="{{ sensor.sensor_type.min_value }}" data-max-value="{{ sensor.sensor_type.max_value }}">
           <div class="card-body d-flex flex-row">
             <div class="w-75 me-3">
               <div class="d-flex align-items-center mb-2">
@@ -148,13 +148,8 @@
                 <div class="fs-6 text-muted lh-sm">{{ sensor.sensor_type.description }}</div>
               </div>
               <div style="font-size: 36px">
-                {{ sensor.value|floatformat:1 }}{{ sensor.sensor_type.unit }}
-                {% if sensor.value > sensor.sensor_type.max_value %}
-                <i class="bi bi-exclamation-triangle-fill" style="color: #F15A24;"></i>
-                {% endif %}
-                {% if sensor.value < sensor.sensor_type.min_value %}
-                <i class="bi bi-exclamation-triangle-fill" style="color: #F15A24;"></i>
-                {% endif %}
+                <span class="sensor-value">{{ sensor.value|floatformat:1 }}</span>{{ sensor.sensor_type.unit }}
+                <i class="bi bi-exclamation-triangle-fill icon-warning {% if sensor.value <= sensor.sensor_type.max_value and sensor.value >= sensor.sensor_type.min_value %}d-none{% endif %}" style="color: #F15A24;"></i>
               </div>
             </div>
             <div class="w-25 d-flex flex-column justify-content-center align-items-center border-start border-secondary-subtle">
@@ -197,11 +192,6 @@
         return $("input[name=csrfmiddlewaretoken]").val();
       }
 
-      $.get("/led/status/", function (data) {
-        $("#ledSwitch").prop("checked", data.status);
-        $("#ledStatus").text(data.status ? "Ligado" : "Desligado");
-      });
-
       $("#ledSwitch").change(function () {
         $.ajax({
           url: "/led/toggle/",
@@ -215,11 +205,58 @@
         });
       });
 
-      $.get("/led/status/", function (data) {
-        console.log("Status inicial:", data.status);
-        $("#ledSwitch").prop("checked", data.status);
-        $("#ledStatus").text(data.status ? "Ligado" : "Desligado");
-      });
+    });
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+
+      // Conecta ao WebSocket do dashboard
+      const deviceMac = "{{ device.mac_address }}".replace(/:/g, '-');
+      const dashboardSocket = new WebSocket(
+        wsScheme + '://' + window.location.host + '/ws/dashboard/' + deviceMac + '/'
+      );
+    
+      // Manipulador de mensagens recebidas
+      dashboardSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        if (data.type === 'dashboard_update') {
+          updateSensors(data.sensor_type, data.value, data.status);
+        }
+      };
+
+      dashboardSocket.onclose = function(e) {
+        console.error('Conexão WebSocket de dashboard fechada');
+        // Tentar reconectar após 5 segundos
+        setTimeout(() => {
+          location.reload();
+        }, 5000);
+      };
+
+      // Função para atualizar a exibição do sensor
+      function updateSensors(sensorType, value, status) {
+        // Encontra todos os cards de sensores
+        const sensorCards = document.querySelectorAll('.sensor-card');
+        sensorCards.forEach(card => {
+          const cardSensorType = card.dataset.sensorType;
+          if (cardSensorType === sensorType) {
+            // Atualiza o valor
+            const valueElement = card.querySelector('.sensor-value');
+            if (valueElement) {
+              valueElement.textContent = value.toFixed(1);
+            }
+            
+            // Atualiza ícone de alerta
+            const minValue = parseFloat(card.dataset.minValue);
+            const maxValue = parseFloat(card.dataset.maxValue);
+            const iconElement = card.querySelector('.icon-warning');
+            if (iconElement) {
+              iconElement.classList.toggle('d-none', value >= minValue && value <= maxValue);
+            }
+          }
+        });
+      }
     });
   </script>
 </body>
