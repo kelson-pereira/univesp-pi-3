@@ -34,7 +34,7 @@
     }
     .hover-icon {
       display: none;
-      color: #3caa35;
+      color: #f15a24;
       transition: all 0.3s ease;
     }
     .icon-container:hover .default-icon {
@@ -59,7 +59,7 @@
     <h2 class="text-center mb-1 fw-bold" style="color: #3caa35;">Controle Hidropônico</h2>
 
     <!-- Atualizado -->
-    <p class="text-center mb-3">{% if updated_now %}<i class="bi bi-clock">{% else %}<i class="bi bi-clock-fill text-muted">{% endif %}</i>
+    <p class="text-center mb-3">{% if updated_now %}<i class="bi bi-clock-fill text-muted">{% else %}<i class="bi bi-clock">{% endif %}</i>
       <span class="lh-sm fw-normal">Atualizado {% if updated_now %}agora{% else %}{{ device.updated_at|timesince }} atrás{% endif %}</span>
     </p>
 
@@ -101,6 +101,12 @@
                 <div class="form-check form-switch d-inline-flex align-items-center mb-2">
                   <input class="form-check-input me-2" type="checkbox" id="ledSwitch" {% if control.schedule_enabled %}checked{% endif %}>
                   <label class="form-check-label fw-semibold" for="ledSwitch">Agendar</label>
+                  <div class="d-flex align-items-center ms-2">
+                    <a class="icon-container" href="#">
+                      <i class="bi bi-pencil fs-5 default-icon"></i>
+                      <i class="bi bi-pencil-fill fs-5 hover-icon"></i>
+                    </a>
+                  </div>
                 </div>
                 <div class="form-check form-switch d-inline-flex align-items-center mb-2">
                   <input class="form-check-input me-2" type="checkbox" id="ledSwitch" {% if control.status %}checked{% endif %}>
