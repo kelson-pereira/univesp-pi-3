@@ -59,9 +59,12 @@
     <div class="text-center mb-3 text-muted"><a href="{% url 'home' %}">Dispositivos</a> <i class="bi bi-chevron-right"></i> {{ device.mac_address }}</div>
     <h2 class="text-center mb-1 fw-bold" style="color: #3caa35;">Controle Hidropônico</h2>
 
-    <!-- Atualizado -->
-    <p class="text-center mb-3">{% if updated_now %}<i class="bi bi-clock-fill text-muted">{% else %}<i class="bi bi-clock">{% endif %}</i>
-      <span class="lh-sm fw-normal">Atualizado {% if updated_now %}agora{% else %}{{ device.updated_at|timesince }} atrás{% endif %}</span>
+    <!-- Última atualização -->
+    <p class="text-center mb-3">
+      <i id="update-icon" class="bi {% if updated_now %}bi-clock-fill text-muted{% else %}bi-clock{% endif %}"></i>
+      <span id="last-updated" class="lh-sm fw-normal">
+        Atualizado {% if updated_now %}agora{% else %}{{ device.updated_at|timesince }} atrás{% endif %}
+      </span>
     </p>
 
     <!-- Controle do LED -->
@@ -222,7 +225,9 @@
       // Manipulador de mensagens recebidas
       dashboardSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
-        if (data.type === 'sensor_update') {
+        if (data.type === 'device_update') {
+          updateDevice(data.updated_now, data.updated_at);
+        } else if (data.type === 'sensor_update') {
           updateSensors(data.sensor_type, data.value, data.status);
         }
       };
@@ -234,6 +239,76 @@
           location.reload();
         }, 5000);
       };
+
+      // Variável global para armazenar o estado
+      let isRecentlyUpdated = "{% if updated_now %}true{% else %}false{% endif %}";
+
+      function formatarTempoDecorrido(dataString) {
+        const dataAtualizacao = new Date(dataString);
+        const agora = new Date();
+        const diferenca = agora - dataAtualizacao;
+        const minutos = Math.floor(diferenca / (1000 * 60));
+        const horas = Math.floor(minutos / 60);
+        const minutosRestantes = minutos % 60;
+        
+        if (isRecentlyUpdated && minutos < 1) {
+          return 'agora';
+        } else if (horas < 1) {
+          return `${minutos} minuto${minutos !== 1 ? 's' : ''} atrás`;
+        } else {
+          return `${horas} hora${horas !== 1 ? 's' : ''}${minutosRestantes > 0 ? `, ${minutosRestantes} minuto${minutosRestantes !== 1 ? 's' : ''}` : ''} atrás`;
+        }
+      }
+
+      const lastUpdatedElement = document.getElementById('last-updated');
+      const lastUpdatedIcon = document.getElementById('update-icon');
+      let lastUpdateTime = "{{ device.updated_at|date:'Y-m-d H:i:s' }}";
+
+      // Atualização periódica
+      function updateTimeDisplay() {
+        const formattedTime = formatarTempoDecorrido(lastUpdateTime);
+        lastUpdatedElement.textContent = `Atualizado ${formattedTime}`;
+        
+        // Atualiza o ícone baseado no tempo decorrido
+        const agora = new Date();
+        const diffInMinutes = (agora - new Date(lastUpdateTime)) / (1000 * 60);
+        
+        if (diffInMinutes < 1 && isRecentlyUpdated) {
+          lastUpdatedIcon.classList.remove('bi-clock');
+          lastUpdatedIcon.classList.add('bi-clock-fill', 'text-muted');
+        } else {
+          lastUpdatedIcon.classList.remove('bi-clock-fill', 'text-muted');
+          lastUpdatedIcon.classList.add('bi-clock');
+          isRecentlyUpdated = false; // Reseta o estado após 1 minuto
+        }
+      }
+
+      // Configurar atualização a cada 30 segundos
+      setInterval(updateTimeDisplay, 30000);
+      updateTimeDisplay(); // Executa imediatamente ao carregar
+
+      // Função para atualização via WebSocket
+      function updateDevice(updatedNow, updatedAt) {
+        if (updatedNow) {
+          isRecentlyUpdated = true;
+          lastUpdateTime = updatedAt || new Date().toISOString();
+          lastUpdatedElement.textContent = 'Atualizado agora';
+          lastUpdatedIcon.classList.remove('bi-clock');
+          lastUpdatedIcon.classList.add('bi-clock-fill', 'text-muted');
+          
+          // Agenda próxima atualização normal
+          setTimeout(updateTimeDisplay, 60000);
+        } else if (updatedAt) {
+          lastUpdateTime = updatedAt;
+          updateTimeDisplay();
+        }
+      }
+
+      // Inicialização correta do ícone
+      if (isRecentlyUpdated) {
+        lastUpdatedIcon.classList.remove('bi-clock');
+        lastUpdatedIcon.classList.add('bi-clock-fill', 'text-muted');
+      }
 
       // Função para atualizar a exibição do sensor
       function updateSensors(sensorType, value, status) {
