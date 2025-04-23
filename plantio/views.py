@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from .models import Led, Device, SensorType, Sensor, ControlType, Control
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from datetime import datetime, time
 
 # Crie suas visualizações aqui.
 
@@ -21,6 +22,11 @@ def dashboard(request, id):
     led = Led.objects.first()
     device = Device.objects.get(mac_address=id)
     controls = Control.objects.filter(device_id=id)
+    for control in controls:
+        new_status = get_control_status(control)
+        if control.status != new_status:  # só atualiza se mudou
+            control.status = new_status
+            control.save(update_fields=['status'])
     sensors = Sensor.objects.filter(device_id=id)
     updated_now = (timezone.now() - device.updated_at).total_seconds() < 60
     return render(request, "dashboard.html", {"led": led, "status": led.status if led else False, "device": device, "updated_now": updated_now, "controls": controls, "sensors": sensors})
@@ -78,13 +84,20 @@ def update(request):
         if "controls" in data:
             for control in data['controls']:
                 control_type = ControlType.objects.get(name=control.get('type'))
+                naive_time = datetime.strptime(control.get('start_time'), '%H:%M:%S').time()
+                local_now = timezone.localtime(timezone.now())
+                local_dt = timezone.make_aware(
+                    datetime.combine(local_now.date(), naive_time),
+                    timezone.get_current_timezone()
+                )
+                utc_zone = getattr(timezone, 'UTC', None) or getattr(timezone, 'utc', None)
                 Control.objects.update_or_create(
                     device=device,
                     control_type=control_type,
                     defaults={
                         'status': control.get('status', False),
                         'schedule_enabled': control.get('schedule_enabled', False),
-                        'start_time': control.get('start_time'),
+                        'start_time': local_dt.astimezone(utc_zone).time(),
                         'interval_on_minutes': control.get('interval_on_minutes'),
                         'interval_off_minutes': control.get('interval_off_minutes'),
                         'repeat_count': control.get('repeat_count', 0)
@@ -131,7 +144,10 @@ def update(request):
 
 
 def get_control_status(control):
-    current_time = timezone.now().time()
+    # Obtém o horário local atual considerando o timezone
+    now = timezone.localtime(timezone.now())
+    current_time = now.time()
+    
     if not control.schedule_enabled:
         return False
     start_minutes = control.start_time.hour * 60 + control.start_time.minute
