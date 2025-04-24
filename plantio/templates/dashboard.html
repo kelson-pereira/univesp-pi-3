@@ -84,27 +84,25 @@
     <h4 class="text-center mb-3 text-muted">Controles</h4>
     <div class="d-flex flex-wrap justify-content-center gap-4 mb-3">
       {% for control in controls %}
-        <div class="card h-100 bg-body-secondary shadow border-0" style="width: 22rem;">
+        <div class="card h-100 bg-body-secondary shadow border-4 border-light-subtle control-card" style="width: 22rem;" data-control-type="{{ control.control_type.name }}">
           <div class="card-body">
-
-              <div class="d-flex mb-2 align-items-center">
-                {% with control.control_type.name as name %}
-                  {% if name == "light" %}
-                    <i class="bi bi-brightness-high-fill fs-4 me-2" style="color: #f15a24;"></i>
-                  {% elif name == "pump" %}
-                    <i class="bi bi-fan fs-4 me-2" style="color: #f15a24;"></i>
-                  {% else %}
-                    <i class="bi bi-speedometer2 fs-4 me-2" style="color: #f15a24;"></i>
-                  {% endif %}
-                {% endwith %}
-                <h5 class="card-title mb-0" style="color: #f15a24;">{{ control.control_type.description }}</h5>
-              </div>
-
+            <div class="d-flex mb-2 align-items-center">
+              {% with control.control_type.name as name %}
+                {% if name == "light" %}
+                  <i class="bi bi-brightness-high-fill fs-4 me-2" style="color: #f15a24;"></i>
+                {% elif name == "pump" %}
+                  <i class="bi bi-fan fs-4 me-2" style="color: #f15a24;"></i>
+                {% else %}
+                  <i class="bi bi-speedometer2 fs-4 me-2" style="color: #f15a24;"></i>
+                {% endif %}
+              {% endwith %}
+              <h5 class="card-title mb-0" style="color: #f15a24;">{{ control.control_type.description }}</h5>
+            </div>
             <div class="card-text d-flex flex-column">
               <div class="d-flex flex-row justify-content-between">
                 <div class="form-check form-switch d-inline-flex align-items-center mb-2">
-                  <input class="form-check-input me-2" type="checkbox" id="ledSwitch" {% if control.schedule_enabled %}checked{% endif %}>
-                  <label class="form-check-label fw-semibold" for="ledSwitch">Agendar</label>
+                  <input class="form-check-input me-2 control-schedule" type="checkbox" {% if control.schedule_enabled %}checked{% endif %}>
+                  <label class="form-check-label fw-semibold">Agendar</label>
                   <div class="d-flex align-items-center ms-2">
                     <a class="icon-container" href="#">
                       <i class="bi bi-pencil fs-5 default-icon"></i>
@@ -113,8 +111,8 @@
                   </div>
                 </div>
                 <div class="form-check form-switch d-inline-flex align-items-center mb-2">
-                  <input class="form-check-input me-2" type="checkbox" id="ledSwitch" {% if control.status %}checked{% endif %}>
-                  <label class="form-check-label fw-semibold" for="ledSwitch">Ligado</label>
+                  <input class="form-check-input me-2 control-status" type="checkbox" {% if control.status %}checked{% endif %}>
+                  <label class="form-check-label fw-semibold">Ligado</label>
                 </div>
               </div>
               <div class="fs-6 lh-sm border-top border-secondary-subtle mt-2 pt-2 text-muted"><small>Iniciar às <b>{{ control.start_time }}</b>, ligar por <b>{{ control.interval_on_minutes }} minutos</b>, desligar por <b>{{ control.interval_off_minutes }} minutos</b>, repetir <b>{{ control.repeat_count }} vezes</b>.</small></div>
@@ -226,9 +224,11 @@
       dashboardSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
         if (data.type === 'device_update') {
-          updateDevice(data.updated_now, data.updated_at);
+          deviceUpdate(data.updated_now, data.updated_at);
+        } else if (data.type === 'control_update') {
+          controlsUpdate(data.control_type, data.schedule_enabled, data.status);
         } else if (data.type === 'sensor_update') {
-          updateSensors(data.sensor_type, data.value, data.status);
+          sensorsUpdate(data.sensor_type, data.value, data.status);
         }
       };
 
@@ -288,7 +288,7 @@
       updateTimeDisplay(); // Executa imediatamente ao carregar
 
       // Função para atualização via WebSocket
-      function updateDevice(updatedNow, updatedAt) {
+      function deviceUpdate(updatedNow, updatedAt) {
         if (updatedNow) {
           isRecentlyUpdated = true;
           lastUpdateTime = updatedAt || new Date().toISOString();
@@ -311,7 +311,7 @@
       }
 
       // Função para atualizar a exibição do sensor
-      function updateSensors(sensorType, value, status) {
+      function sensorsUpdate(sensorType, value, status) {
         // Encontra todos os cards de sensores
         const sensorCards = document.querySelectorAll('.sensor-card');
         sensorCards.forEach(card => {
@@ -320,7 +320,7 @@
             // Atualiza o valor
             const valueElement = card.querySelector('.sensor-value');
             if (valueElement) {
-              valueElement.textContent = value.toFixed(1).replace('.', ',');;
+              valueElement.textContent = value.toFixed(1).replace('.', ',');
             }
             // Atualiza ícone de alerta
             const minValue = parseFloat(card.dataset.minValue);
@@ -339,6 +339,36 @@
           }
         });
       }
+
+      // Função para atualizar a exibição do control
+      function controlsUpdate(controlType, schedule, status) {
+        // Encontra todos os cards de controls
+        const controlCards = document.querySelectorAll('.control-card');
+        controlCards.forEach(card => {
+          const cardControlType = card.dataset.controlType;
+          console.log("cardControlType: " + cardControlType)
+          if (cardControlType === controlType) {
+            // Atualiza o switch schedule
+            const switchSchedule = card.querySelector('.control-schedule');
+            if (switchSchedule) {
+              switchSchedule.checked = schedule;
+            }
+            // Atualiza o switch status
+            const switchStatus = card.querySelector('.control-status');
+            if (switchStatus) {
+              switchStatus.checked = status;
+            }
+            // Efeito visual de atualização
+            card.classList.add('border-warning');
+            card.classList.remove('border-light-subtle');
+            setTimeout(() => {
+              card.classList.add('border-light-subtle');
+              card.classList.remove('border-warning');
+            }, 1000);
+          }
+        });
+      }
+
     });
   </script>
 </body>

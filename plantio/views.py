@@ -129,16 +129,16 @@ def update(request):
             if control.status != new_status:  # só atualiza se mudou
                 control.status = new_status
                 control.save(update_fields=['status'])
-                channel_layer = get_channel_layer() # notificar via WebSocket
-                async_to_sync(channel_layer.group_send)(
-                    f"dashboard_{device.mac_address.replace(':','-')}",
-                    {
-                        "type": "control_update",
-                        "control_type": control.control_type.name,
-                        "schedule_enabled": control.schedule_enabled,
-                        "status": new_status
-                    }
-                )
+            channel_layer = get_channel_layer() # notificar via WebSocket
+            async_to_sync(channel_layer.group_send)(
+                f"dashboard_{device.mac_address.replace(':','-')}",
+                {
+                    "type": "control_update",
+                    "control_type": control.control_type.name,
+                    "schedule_enabled": control.schedule_enabled,
+                    "status": new_status
+                }
+            )
             response_json[control.control_type.name] = new_status
         return JsonResponse(response_json)
 
@@ -147,7 +147,6 @@ def get_control_status(control):
     # Obtém o horário local atual considerando o timezone
     now = timezone.localtime(timezone.now())
     current_time = now.time()
-    
     if not control.schedule_enabled:
         return False
     start_minutes = control.start_time.hour * 60 + control.start_time.minute
