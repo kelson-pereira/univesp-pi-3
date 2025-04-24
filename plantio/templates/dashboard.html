@@ -90,14 +90,14 @@
               <div class="d-flex mb-2 align-items-center">
                 {% with control.control_type.name as name %}
                   {% if name == "light" %}
-                    <i class="bi bi-brightness-high-fill fs-4 me-2" style="color: #F15A24;"></i>
+                    <i class="bi bi-brightness-high-fill fs-4 me-2" style="color: #f15a24;"></i>
                   {% elif name == "pump" %}
-                    <i class="bi bi-fan fs-4 me-2" style="color: #F15A24;"></i>
+                    <i class="bi bi-fan fs-4 me-2" style="color: #f15a24;"></i>
                   {% else %}
-                    <i class="bi bi-speedometer2 fs-4 me-2" style="color: #F15A24;"></i>
+                    <i class="bi bi-speedometer2 fs-4 me-2" style="color: #f15a24;"></i>
                   {% endif %}
                 {% endwith %}
-                <h5 class="card-title mb-0" style="color: #F15A24;">{{ control.control_type.description }}</h5>
+                <h5 class="card-title mb-0" style="color: #f15a24;">{{ control.control_type.description }}</h5>
               </div>
 
             <div class="card-text d-flex flex-column">
@@ -128,7 +128,7 @@
     <h4 class="text-center mb-3 text-muted">Sensores</h4>
     <div class="d-flex flex-wrap justify-content-center gap-4 mb-3">
       {% for sensor in sensors %}
-        <div class="card bg-body-secondary shadow border-0 flex-row sensor-card sensor-updated" style="width: 22rem; height: 8.5rem;" data-sensor-type="{{ sensor.sensor_type.name }}" data-value="{{ sensor.value }}" data-min-value="{{ sensor.sensor_type.min_value }}" data-max-value="{{ sensor.sensor_type.max_value }}">
+        <div class="card bg-body-secondary shadow border-4 border-light-subtle flex-row sensor-card" style="width: 22rem; height: 8.5rem;" data-sensor-type="{{ sensor.sensor_type.name }}" data-value="{{ sensor.value }}" data-min-value="{{ sensor.sensor_type.min_value }}" data-max-value="{{ sensor.sensor_type.max_value }}">
           <div class="card-body d-flex flex-row">
             <div class="w-75 me-3">
               <div class="d-flex align-items-center mb-2">
@@ -320,7 +320,7 @@
             // Atualiza o valor
             const valueElement = card.querySelector('.sensor-value');
             if (valueElement) {
-              valueElement.textContent = value.toFixed(1);
+              valueElement.textContent = value.toFixed(1).replace('.', ',');;
             }
             // Atualiza ícone de alerta
             const minValue = parseFloat(card.dataset.minValue);
@@ -329,6 +329,13 @@
             if (iconElement) {
               iconElement.classList.toggle('d-none', value >= minValue && value <= maxValue);
             }
+            // Efeito visual de atualização
+            card.classList.add('border-warning');
+            card.classList.remove('border-light-subtle');
+            setTimeout(() => {
+              card.classList.add('border-light-subtle');
+              card.classList.remove('border-warning');
+            }, 1000);
           }
         });
       }
