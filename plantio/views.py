@@ -21,7 +21,7 @@ def home(request):
 def dashboard(request, id):
     led = Led.objects.first()
     device = Device.objects.get(mac_address=id)
-    controls = Control.objects.filter(device_id=id)
+    controls = Control.objects.filter(device_id=id).order_by(id)
     for control in controls:
         new_status = get_control_status(control)
         if control.status != new_status:  # só atualiza se mudou
