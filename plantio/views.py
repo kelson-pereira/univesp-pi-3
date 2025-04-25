@@ -178,17 +178,17 @@ def scheduler_controls(request):
         if control.status != new_status:  # só atualiza se mudou
             control.status = new_status
             control.save(update_fields=['status'])
-            
-            # notificar via WebSocket
-            channel_layer = get_channel_layer()
-            async_to_sync(channel_layer.group_send)(
-                f"device_{control.device.mac_address.replace(":","-")}",
-                {
-                    "type": "control_status_update",
-                    "control_name": control.control_type.name,
-                    "status": new_status
-                }
-            )
+        # notificar via WebSocket
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"dashboard_{control.device.mac_address.replace(':','-')}",
+            {
+                "type": "control_update",
+                "control_type": control.control_type.name,
+                "schedule_enabled": control.schedule_enabled,
+                "status": new_status
+            }
+        )
     return JsonResponse({'status': 'success'})
 
 
