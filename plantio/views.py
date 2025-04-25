@@ -122,8 +122,8 @@ def update(request):
                         "status": True
                     }
                 )
-        controls = Control.objects.filter(device_id=mac_address)
         response_json = {}
+        controls = Control.objects.filter(device_id=mac_address)
         for control in controls:
             new_status = get_control_status(control)
             if control.status != new_status:  # só atualiza se mudou
@@ -140,6 +140,10 @@ def update(request):
                 }
             )
             response_json[control.control_type.name] = new_status
+        sensors = Sensor.objects.filter(device_id=mac_address)
+        for sensor in sensors:
+            response_json[sensor.sensor_type.name + '_min'] = sensor.sensor_type.min_value
+            response_json[sensor.sensor_type.name + '_max'] = sensor.sensor_type.max_value
         return JsonResponse(response_json)
 
 
