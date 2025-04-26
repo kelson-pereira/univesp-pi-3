@@ -19,10 +19,15 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView
 from plantio import views
+from plantio.views import home, login_view, logout_view, reset_view, signup_view, led_status, toggle_led, led_control_view, sensor_data
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", views.home, name="home"),
+    path("login/", views.login_view, name="login"),
+    path("logout/", views.logout_view, name="logout"),
+    path("reset/", views.reset_view, name="reset"),
+    path("signup/", views.signup_view, name="signup"),
     path("favicon.ico", RedirectView.as_view(url="/static/imagens/favicon.ico", permanent=True)),
     path("dashboard/<str:id>/", views.dashboard, name="dashboard"),
     path("update/", views.update, name="update"),

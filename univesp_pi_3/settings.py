@@ -203,3 +203,8 @@ WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 django_heroku.settings(locals(), staticfiles=False)
+
+AUTHENTICATION_BACKENDS = [
+    'plantio.backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend'
+]
