@@ -185,6 +185,22 @@ def update_schedule_status(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
+@csrf_exempt
+@require_POST
+def update_control_status(request):
+    try:
+        data = json.loads(request.body)
+        control = Control.objects.get(
+            device__mac_address=data['device_id'],
+            control_type__name=data['control_name']
+        )
+        control.schedule_enabled = data['status']
+        control.save(update_fields=['status'])
+        
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
 
 def get_control_status(control):
     # Obtém o horário local atual considerando o timezone
