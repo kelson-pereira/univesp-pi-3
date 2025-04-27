@@ -32,4 +32,5 @@ urlpatterns = [
     path("sensors/", views.sensor_data, name="sensor_data"),
     path("dashboard/<str:id>/", views.dashboard, name="dashboard"),
     path("update/", views.update, name="update"),
+    path('update-schedule/', views.update_schedule, name='update_schedule'),
 ]

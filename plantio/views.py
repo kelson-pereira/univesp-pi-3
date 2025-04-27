@@ -1,7 +1,8 @@
 import json
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render
+from django.views.decorators.http import require_POST
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from .models import Led, Device, SensorType, Sensor, ControlType, Control
 from channels.layers import get_channel_layer
@@ -146,6 +147,25 @@ def update(request):
             response_json[sensor.sensor_type.name + '_min'] = sensor.sensor_type.min_value
             response_json[sensor.sensor_type.name + '_max'] = sensor.sensor_type.max_value
         return JsonResponse(response_json)
+
+
+@require_POST
+def update_schedule(request):
+    try:
+        device_id = request.POST.get('device_id')
+        control_name = request.POST.get('control_name')
+        control = Control.objects.get(device__mac_address=device_id, control_type__name=control_name)
+        
+        # Atualiza os campos
+        control.start_time = request.POST.get('start_time')
+        control.interval_on_minutes = request.POST.get('interval_on_minutes')
+        control.interval_off_minutes = request.POST.get('interval_off_minutes')
+        control.repeat_count = request.POST.get('repeat_count')
+        control.save()
+        
+        return redirect('dashboard', id=device_id)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 
 def get_control_status(control):
