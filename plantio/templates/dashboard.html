@@ -55,11 +55,11 @@
     .icon-container:hover .hover-icon {
       display: inline;
     }
-    .form-check-input[readonly] {
+    .form-check-input:disabled {
       cursor: not-allowed;
-      opacity: 0.8;
+      opacity: 0.5;
     }
-    .form-switch .form-check-input[readonly]:not(:checked) {
+    .form-switch .form-check-input:disabled {
       background-color: #e9ecef;
     }
   </style>
@@ -134,7 +134,7 @@
                   </div>
                 </div>
                 <div class="form-check form-switch d-inline-flex align-items-center mb-2">
-                  <input class="form-check-input me-2 control-status" type="checkbox" {% if control.status %}checked{% endif %} {% if control.schedule_enabled %}readonly{% endif %}>
+                  <input class="form-check-input me-2 control-status" type="checkbox" {% if control.status %}checked{% endif %} {% if control.schedule_enabled %}disabled{% endif %}>
                   <label class="form-check-label fw-semibold">Ligado</label>
                 </div>
               </div>
@@ -263,6 +263,11 @@
       document.querySelectorAll('.control-schedule').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
           const card = this.closest('.control-card');
+          const statusCheckbox = card.querySelector('.control-status');
+
+          // Atualiza o estado disabled do checkbox de status
+          statusCheckbox.disabled = this.checked;
+          
           const deviceId = '{{ device.mac_address }}';
           const controlType = card.dataset.controlType;
           const isEnabled = this.checked;
@@ -293,9 +298,13 @@
           }
         } catch (error) {
           console.error('Falha:', error);
-          // Reverte visualmente se falhar
           const checkbox = document.querySelector(`.control-card[data-control-type="${controlType}"] .control-schedule`);
-          if (checkbox) checkbox.checked = !enabled;
+          if (checkbox) {
+            checkbox.checked = !enabled;
+            // Reverte também o estado do status
+            const statusCheckbox = document.querySelector(`.control-card[data-control-type="${controlType}"] .control-status`);
+            if (statusCheckbox) statusCheckbox.disabled = !enabled;
+          }
         }
       }
     });
@@ -308,7 +317,7 @@
     document.querySelectorAll('.control-status').forEach(checkbox => {
       checkbox.addEventListener('change', function() {
 
-        if (this.hasAttribute('readonly')) {
+        if (this.disabled) {
           this.checked = !this.checked; // Reverte a mudança
           return;
         }
