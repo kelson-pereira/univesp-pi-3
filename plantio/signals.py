@@ -4,7 +4,7 @@ from .models import SensorType, ControlType
 def create_sensor_type(sender, **kwargs):
     sensor_types = [
         {"name": "tmpA", "description": "Temperatura ambiente", "unit": "°C", "min_value": 10, "max_value": 35},
-        {"name": "umdA", "description": "Umidade relativa do ar", "unit": "%", "min_value": 50, "max_value": 85},
+        {"name": "umdA", "description": "Umidade relativa do ar", "unit": "%", "min_value": 35, "max_value": 85},
         {"name": "tmpS", "description": "Temperatura da solução nutritiva", "unit": "°C", "min_value": 15, "max_value": 32},
         {"name": "levS", "description": "Nível da solução nutritiva", "unit": "", "min_value": 0.1, "max_value": 1.1},
     ]
