@@ -194,7 +194,7 @@ def update_control_status(request):
             device__mac_address=data['device_id'],
             control_type__name=data['control_name']
         )
-        control.schedule_enabled = data['status']
+        control.status = data['status']
         control.save(update_fields=['status'])
         
         return JsonResponse({'status': 'success'})
