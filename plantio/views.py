@@ -149,6 +149,7 @@ def update(request):
         return JsonResponse(response_json)
 
 
+@csrf_exempt
 @require_POST
 def update_schedule(request):
     try:
