@@ -33,4 +33,5 @@ urlpatterns = [
     path("dashboard/<str:id>/", views.dashboard, name="dashboard"),
     path("update/", views.update, name="update"),
     path('update-schedule/', views.update_schedule, name='update_schedule'),
+    path('update_schedule_status/', views.update_schedule_status, name='update_schedule_status'),
 ]

@@ -250,6 +250,50 @@
   </script>
 
 
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Evento para os checkboxes de agendamento
+      document.querySelectorAll('.control-schedule').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+          const card = this.closest('.control-card');
+          const deviceId = '{{ device.mac_address }}';
+          const controlType = card.dataset.controlType;
+          const isEnabled = this.checked;
+
+          updateScheduleStatus(deviceId, controlType, isEnabled);
+        });
+      });
+
+      // Função para atualizar no servidor
+      async function updateScheduleStatus(deviceId, controlType, enabled) {
+        try {
+          const response = await fetch('/update_schedule_status/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+              device_id: deviceId,
+              control_name: controlType,
+              schedule_enabled: enabled
+            })
+          });
+
+          const data = await response.json();
+          if (data.status !== 'success') {
+            throw new Error(data.message || 'Erro ao atualizar');
+          }
+        } catch (error) {
+          console.error('Falha:', error);
+          // Reverte visualmente se falhar
+          const checkbox = document.querySelector(`.control-card[data-control-type="${controlType}"] .control-schedule`);
+          if (checkbox) checkbox.checked = !enabled;
+        }
+      }
+    });
+  </script>
+
   <!-- Bootstrap JS -->
   <!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>-->
 
