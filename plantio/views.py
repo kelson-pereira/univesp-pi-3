@@ -191,7 +191,7 @@ def get_control_status(control):
     now = timezone.localtime(timezone.now())
     current_time = now.time()
     if not control.schedule_enabled:
-        return False
+        return control.status
     start_minutes = control.start_time.hour * 60 + control.start_time.minute
     current_minutes = current_time.hour * 60 + current_time.minute
     if current_minutes < start_minutes:
