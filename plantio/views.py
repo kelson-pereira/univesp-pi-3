@@ -180,7 +180,20 @@ def update_schedule_status(request):
         )
         control.schedule_enabled = data['schedule_enabled']
         control.save(update_fields=['schedule_enabled'])
-        
+        new_status = get_control_status(control)
+        if control.status != new_status:  # só atualiza se mudou
+                control.status = new_status
+                control.save(update_fields=['status'])
+        channel_layer = get_channel_layer() # notificar via WebSocket
+        async_to_sync(channel_layer.group_send)(
+            f"dashboard_{data['device_id'].replace(':','-')}",
+            {
+                "type": "control_update",
+                "control_type": control.control_type.name,
+                "schedule_enabled": control.schedule_enabled,
+                "status": new_status
+            }
+        )
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
@@ -196,7 +209,16 @@ def update_control_status(request):
         )
         control.status = data['status']
         control.save(update_fields=['status'])
-        
+        channel_layer = get_channel_layer() # notificar via WebSocket
+        async_to_sync(channel_layer.group_send)(
+            f"dashboard_{data['device_id'].replace(':','-')}",
+            {
+                "type": "control_update",
+                "control_type": control.control_type.name,
+                "schedule_enabled": control.schedule_enabled,
+                "status": control.status
+            }
+        )
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
