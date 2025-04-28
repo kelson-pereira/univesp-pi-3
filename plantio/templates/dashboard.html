@@ -255,7 +255,6 @@
     });
   </script>
 
-
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Evento para os checkboxes de agendamento
@@ -278,7 +277,7 @@
       // Função para atualizar no servidor
       async function updateScheduleStatus(deviceId, controlType, enabled) {
         try {
-          const response = await fetch('/update_schedule_status/', {
+          const response = await fetch('/update-schedule-status/', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -309,95 +308,55 @@
     });
   </script>
 
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Evento para os checkboxes de agendamento
+      document.querySelectorAll('.control-status').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
 
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Evento para os checkboxes de agendamento
-    document.querySelectorAll('.control-status').forEach(checkbox => {
-      checkbox.addEventListener('change', function() {
-
-        if (this.disabled) {
-          this.checked = !this.checked; // Reverte a mudança
-          return;
-        }
-
-        const card = this.closest('.control-card');
-        const deviceId = '{{ device.mac_address }}';
-        const controlType = card.dataset.controlType;
-        const isEnabled = this.checked;
-
-        updateControlStatus(deviceId, controlType, isEnabled);
-      });
-    });
-
-    // Função para atualizar no servidor
-    async function updateControlStatus(deviceId, controlType, enabled) {
-      try {
-        const response = await fetch('/update_control_status/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}'
-          },
-          body: JSON.stringify({
-            device_id: deviceId,
-            control_name: controlType,
-            status: enabled
-          })
-        });
-
-        const data = await response.json();
-        if (data.status !== 'success') {
-          throw new Error(data.message || 'Erro ao atualizar');
-        }
-      } catch (error) {
-        console.error('Falha:', error);
-        // Reverte visualmente se falhar
-        const checkbox = document.querySelector(`.control-card[data-control-type="${controlType}"] .control-status`);
-        if (checkbox) checkbox.checked = !enabled;
-      }
-    }
-  });
-</script>
-
-
-  <!-- Bootstrap JS -->
-  <!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>-->
-
-  <!--<script>
-    $(document).ready(function () {
-      const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
-
-      const socket = new WebSocket(
-        `${wsScheme}://` + window.location.host + `/ws/dashboard/`
-      );
-
-      socket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        const status = data.status;
-        $("#ledSwitch").prop("checked", status);
-        $("#ledStatus").text(status ? "Ligado" : "Desligado");
-      };
-
-      function getCSRFToken() {
-        return $("input[name=csrfmiddlewaretoken]").val();
-      }
-
-      $("#ledSwitch").change(function () {
-        $.ajax({
-          url: "/led/toggle/",
-          type: "POST",
-          headers: { "X-CSRFToken": getCSRFToken() },
-          success: function (data) {
-          },
-          error: function (xhr, status, error) {
-            console.log("Erro na requisição:", error);
+          if (this.disabled) {
+            this.checked = !this.checked; // Reverte a mudança
+            return;
           }
+
+          const card = this.closest('.control-card');
+          const deviceId = '{{ device.mac_address }}';
+          const controlType = card.dataset.controlType;
+          const isEnabled = this.checked;
+
+          updateControlStatus(deviceId, controlType, isEnabled);
         });
       });
 
+      // Função para atualizar control status
+      async function updateControlStatus(deviceId, controlType, enabled) {
+        try {
+          const response = await fetch('/update-control-status/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+              device_id: deviceId,
+              control_name: controlType,
+              status: enabled
+            })
+          });
+
+          const data = await response.json();
+          if (data.status !== 'success') {
+            throw new Error(data.message || 'Erro ao atualizar');
+          }
+        } catch (error) {
+          console.error('Falha:', error);
+          // Reverte visualmente se falhar
+          const checkbox = document.querySelector(`.control-card[data-control-type="${controlType}"] .control-status`);
+          if (checkbox) checkbox.checked = !enabled;
+        }
+      }
     });
-  </script>-->
+  </script>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
