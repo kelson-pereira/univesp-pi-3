@@ -55,12 +55,6 @@
     .icon-container:hover .hover-icon {
       display: inline;
     }
-    .form-check-input:disabled {
-      opacity: 0.5;
-    }
-    .form-switch .form-check-input:disabled {
-      background-color: #e9ecef;
-    }
     .form-switch:has(.form-check-input:disabled) {
       cursor: not-allowed;
     }
@@ -135,9 +129,12 @@
                     </a>
                   </div>
                 </div>
-                <div class="form-check form-switch d-inline-flex align-items-center mb-2">
-                  <input class="form-check-input me-2 control-status" type="checkbox" {% if control.status %}checked{% endif %} {% if control.schedule_enabled %}disabled{% endif %}>
-                  <label class="form-check-label fw-semibold">Ligado</label>
+                <div class="d-flex align-items-center mb-2 gap-2">
+                  <span class="fw-semibold">Off</span>
+                  <div class="form-check form-switch d-inline-flex align-items-center">
+                      <input class="form-check-input control-status" type="checkbox" {% if control.status %}checked{% endif %} {% if control.schedule_enabled %}disabled{% endif %}>
+                  </div>
+                  <span class="fw-semibold">On</span>
                 </div>
               </div>
               <div class="fs-6 lh-sm border-top border-secondary-subtle mt-2 pt-2 text-muted"><small>Iniciar às <b>{{ control.start_time }}</b>, ligar por <b>{{ control.interval_on_minutes }} minutos</b>, desligar por <b>{{ control.interval_off_minutes }} minutos</b>, repetir <b>{{ control.repeat_count }} vezes</b>.</small></div>
