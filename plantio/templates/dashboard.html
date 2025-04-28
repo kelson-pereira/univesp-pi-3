@@ -263,8 +263,10 @@
           const card = this.closest('.control-card');
           const statusCheckbox = card.querySelector('.control-status');
 
-          // Atualiza o estado disabled do checkbox de status
-          statusCheckbox.disabled = this.checked;
+          // Atualiza o estado do control status
+          if(statusCheckbox) {
+            statusCheckbox.disabled = this.checked;
+          }
           
           const deviceId = '{{ device.mac_address }}';
           const controlType = card.dataset.controlType;
@@ -494,7 +496,6 @@
         const controlCards = document.querySelectorAll('.control-card');
         controlCards.forEach(card => {
           const cardControlType = card.dataset.controlType;
-          console.log("cardControlType: " + cardControlType)
           if (cardControlType === controlType) {
             // Atualiza o switch schedule
             const switchSchedule = card.querySelector('.control-schedule');
