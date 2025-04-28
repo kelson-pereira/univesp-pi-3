@@ -19,20 +19,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView
 from plantio import views
-from plantio.views import home, led_status, toggle_led, led_control_view, sensor_data
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", views.home, name="home"),
     path("favicon.ico", RedirectView.as_view(url="/static/imagens/favicon.ico", permanent=True)),
-    path("led/status/", views.led_status, name="led_status"),
-    path("led/toggle/", views.toggle_led, name="toggle_led"),
-    path("led/control/", views.led_control_view, name="led_control"),
-    path("controls/", views.controls, name='controls'),
-    path('update_control_status/', views.update_control_status, name='update_control_status'),
-    path("sensors/", views.sensor_data, name="sensor_data"),
     path("dashboard/<str:id>/", views.dashboard, name="dashboard"),
     path("update/", views.update, name="update"),
     path('update-schedule/', views.update_schedule, name='update_schedule'),
-    path('update_schedule_status/', views.update_schedule_status, name='update_schedule_status'),
+    path('update-schedule-status/', views.update_schedule_status, name='update_schedule_status'),
+    path('update-control-status/', views.update_control_status, name='update_control_status'),
 ]

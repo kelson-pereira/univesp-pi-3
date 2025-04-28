@@ -4,12 +4,6 @@ from datetime import time
 # Crie seus modelos aqui.
 
 
-class Led(models.Model):
-    status = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
 class Device(models.Model):
     mac_address = models.CharField(primary_key=True, max_length=17, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)

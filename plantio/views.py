@@ -1,26 +1,24 @@
 import json
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+from datetime import datetime
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from .models import Led, Device, SensorType, Sensor, ControlType, Control
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
-from datetime import datetime, time
+from .models import *
 
 # Crie suas visualizações aqui.
 
 
 def home(request):
     devices = Device.objects.all()
-    print('OK' + str(devices.count()))
     return render(request, "home.html", {"devices": devices})
 
 
 @csrf_exempt
 def dashboard(request, id):
-    led = Led.objects.first()
     device = Device.objects.get(mac_address=id)
     controls = Control.objects.filter(device_id=id).order_by('id')
     for control in controls:
@@ -30,40 +28,7 @@ def dashboard(request, id):
             control.save(update_fields=['status'])
     sensors = Sensor.objects.filter(device_id=id)
     updated_now = (timezone.now() - device.updated_at).total_seconds() < 60
-    return render(request, "dashboard.html", {"led": led, "status": led.status if led else False, "device": device, "updated_now": updated_now, "controls": controls, "sensors": sensors})
-
-
-@csrf_exempt
-def controls(request):
-    if request.method == 'GET':
-        data = json.loads(request.body)
-        mac_address = data.get('mac')
-        device, _ = Device.objects.update_or_create(mac_address=mac_address)
-        controls = Control.objects.filter(device_id=mac_address)
-        response_json = {}
-        for control in controls:
-            status = get_control_status(control)
-            response_json[control.control_type.name] = status
-        return JsonResponse(response_json)
-    elif request.method == 'POST':
-        data = json.loads(request.body)
-        mac_address = data.get('mac')
-        device, _ = Device.objects.update_or_create(mac_address=mac_address)
-        for control in data['controls']:
-            control_type = ControlType.objects.get(name=control.get('type'))
-            Control.objects.update_or_create(
-                device=device,
-                control_type=control_type,
-                defaults={
-                    'status': control.get('status', False),
-                    'schedule_enabled': control.get('schedule_enabled', False),
-                    'start_time': control.get('start_time'),
-                    'interval_on_minutes': control.get('interval_on_minutes'),
-                    'interval_off_minutes': control.get('interval_off_minutes'),
-                    'repeat_count': control.get('repeat_count', 0)
-                }
-            )
-        return JsonResponse({'status': 'success'})
+    return render(request, "dashboard.html", {"device": device, "updated_now": updated_now, "controls": controls, "sensors": sensors})
 
 
 @csrf_exempt
@@ -73,7 +38,7 @@ def update(request):
         mac_address = data.get('mac')
         device, _ = Device.objects.update_or_create(mac_address=mac_address)
         updated_now = (timezone.now() - device.updated_at).total_seconds() < 60
-        channel_layer = get_channel_layer()
+        channel_layer = get_channel_layer() # notificar via websocket
         async_to_sync(channel_layer.group_send)(
             f"dashboard_{device.mac_address.replace(':','-')}",
             {
@@ -112,8 +77,7 @@ def update(request):
                     sensor_type=sensor_type,
                     defaults={"value": sensor.get('value'), "status": True},
                 )
-                # Notificar via WebSocket
-                channel_layer = get_channel_layer()
+                channel_layer = get_channel_layer() # notificar via websocket
                 async_to_sync(channel_layer.group_send)(
                     f"dashboard_{device.mac_address.replace(':','-')}",
                     {
@@ -130,7 +94,7 @@ def update(request):
             if control.status != new_status:  # só atualiza se mudou
                 control.status = new_status
                 control.save(update_fields=['status'])
-            channel_layer = get_channel_layer() # notificar via WebSocket
+            channel_layer = get_channel_layer() # notificar via websocket
             async_to_sync(channel_layer.group_send)(
                 f"dashboard_{device.mac_address.replace(':','-')}",
                 {
@@ -156,8 +120,6 @@ def update_schedule(request):
         device_id = request.POST.get('device_id')
         control_name = request.POST.get('control_name')
         control = Control.objects.get(device__mac_address=device_id, control_type__name=control_name)
-        
-        # Atualiza os campos
         control.start_time = request.POST.get('start_time')
         control.interval_on_minutes = request.POST.get('interval_on_minutes')
         control.interval_off_minutes = request.POST.get('interval_off_minutes')
@@ -184,7 +146,7 @@ def update_schedule_status(request):
         if control.status != new_status:  # só atualiza se mudou
                 control.status = new_status
                 control.save(update_fields=['status'])
-        channel_layer = get_channel_layer() # notificar via WebSocket
+        channel_layer = get_channel_layer() # notificar via websocket
         async_to_sync(channel_layer.group_send)(
             f"dashboard_{data['device_id'].replace(':','-')}",
             {
@@ -209,7 +171,7 @@ def update_control_status(request):
         )
         control.status = data['status']
         control.save(update_fields=['status'])
-        channel_layer = get_channel_layer() # notificar via WebSocket
+        channel_layer = get_channel_layer() # notificar via websocket
         async_to_sync(channel_layer.group_send)(
             f"dashboard_{data['device_id'].replace(':','-')}",
             {
@@ -255,8 +217,7 @@ def scheduler_controls(request):
         if control.status != new_status:  # só atualiza se mudou
             control.status = new_status
             control.save(update_fields=['status'])
-        # notificar via WebSocket
-        channel_layer = get_channel_layer()
+        channel_layer = get_channel_layer() # notificar via websocket
         async_to_sync(channel_layer.group_send)(
             f"dashboard_{control.device.mac_address.replace(':','-')}",
             {
@@ -267,53 +228,3 @@ def scheduler_controls(request):
             }
         )
     return JsonResponse({'status': 'success'})
-
-
-def led_status(request):
-    led = Led.objects.first()
-    return JsonResponse({"status": led.status})
-
-
-@csrf_exempt
-def toggle_led(request):
-    led, _ = Led.objects.get_or_create(id=1)
-    led.status = not led.status
-    led.save()
-
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        "led_control", {"type": "led_status_update", "status": led.status}
-    )
-    return JsonResponse({"led": led.status})
-
-
-@csrf_exempt
-def led_control_view(request):
-    led = Led.objects.first()
-    sensors = Sensor.objects.all()
-    return render(
-        request,
-        "led_control.html",
-        {"led": led, "status": led.status if led else False, "sensors": sensors},
-    )
-
-
-@csrf_exempt
-def sensor_data(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        mac_address = data.get("mac")
-        device, _ = Device.objects.update_or_create(mac_address=mac_address)
-        values = {key: float(value) for key, value in data.items() if key != "mac"}
-        for key, value in values.items():
-            sensor_type, _ = SensorType.objects.get_or_create(name=key)
-            sensor, created = Sensor.objects.get_or_create(
-                sensor_type=sensor_type,
-                device=device,
-                defaults={"value": value, "status": True},
-            )
-            if not created:
-                sensor.value = value
-                sensor.status = True
-                sensor.save()
-        return JsonResponse({"status": "success"})
