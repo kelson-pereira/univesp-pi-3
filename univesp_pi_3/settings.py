@@ -208,3 +208,10 @@ AUTHENTICATION_BACKENDS = [
     'plantio.backends.EmailBackend',
     'django.contrib.auth.backends.ModelBackend'
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://plantio-74e808a068fc.herokuapp.com',
+]
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
