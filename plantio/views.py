@@ -4,18 +4,57 @@ from channels.layers import get_channel_layer
 from datetime import datetime
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from .models import *
+from .forms import LoginForm
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from datetime import datetime, time
 
 # Crie suas visualizações aqui.
 
-
+@login_required(login_url='login')
 def home(request):
     devices = Device.objects.all()
     return render(request, "home.html", {"devices": devices})
 
+@csrf_exempt
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    form = LoginForm()
+
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=email, password=password)
+
+            if user is not None:
+                login(request, user)
+                return redirect('home')
+            else:
+                messages.error(request, 'Senha ou Email incorretos')
+
+    return render(request, 'login.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+@csrf_exempt
+def signup_view(request):
+    return render(request, 'signup.html')
+
+def reset_view(request):
+    return render(request, 'reset.html')
 
 @csrf_exempt
 def dashboard(request, id):

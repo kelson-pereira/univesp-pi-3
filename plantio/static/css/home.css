@@ -1,0 +1,11 @@
+:root {
+  --bs-orange: #f15a24;
+}
+.btn-orange {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--bs-orange);
+  --bs-btn-border-color: var(--bs-orange);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #d04a1a;
+  --bs-btn-hover-border-color: #c14518;
+}

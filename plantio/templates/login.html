@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+	<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
+{% block title %}Login - Plantio{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+	<div class="row">
+		<div id="form" class="card mx-auto">
+			<form method="post" novalidate>
+				{% csrf_token %}
+
+				<div class="text-center mt-3">
+					<img src="{% static 'imagens/plantio.svg' %}" alt="Plantio Hidroponia" style="height: 160px; padding: 15px; margin-top: 10px;" />
+				</div>
+
+				<div class="mt-3">
+					{{ form.email.label_tag }}
+					{{ form.email }}
+				</div>
+
+				<div class="mt-3">
+          {{ form.password.label_tag }}
+          {{ form.password }}
+        </div>
+				
+				<div class="mt-2">
+
+					{% if messages %}
+						{% for message in messages %}
+							<small class="text-danger">{{ message }}</small>
+						{% endfor %}
+					{% else %}
+						<small class="invisible">.</small>
+					{% endif %}
+
+				</div>
+				<div>
+					<small><a href="{% url 'reset' %}">Esqueci a senha</a> | <a href="{% url 'signup' %}">Criar conta</a></small>
+				</div>
+				<div class="mt-1" align="center">
+					<button type="submit" class="btn btn-primary col-12">Entrar</button>
+				</div>
+			</form>
+		</div>
+  </div>
+</div>
+{% endblock %}
