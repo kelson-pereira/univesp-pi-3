@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView
 from plantio import views
-from plantio.views import home, login_view, logout_view, reset_view, signup_view, led_status, toggle_led, led_control_view, sensor_data
+from plantio.views import home, login_view, logout_view, reset_view, signup_view
 
 urlpatterns = [
     path("admin/", admin.site.urls),
