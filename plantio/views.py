@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from .models import *
-from .forms import LoginForm
+from .forms import LoginForm, SignupForm
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from datetime import datetime, time
@@ -51,7 +51,29 @@ def logout_view(request):
 
 @csrf_exempt
 def signup_view(request):
-    return render(request, 'signup.html')
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    form = SignupForm()
+
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+
+            # Crie o usuário
+            user = User.objects.create_user(username=email, email=email, password=password)
+            user.save()
+
+            # Faça login do usuário
+            login(request, user)
+
+            return redirect('home')
+        else:
+            messages.error(request, 'Erro ao criar conta')
+            
+    return render(request, 'signup.html', {'form': form})
 
 def reset_view(request):
     return render(request, 'reset.html')
