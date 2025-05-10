@@ -59,3 +59,19 @@ Projeto Integrador em Computação III - Grupo 4
 `heroku logs --tail --app plantio`
 
 ### Comandos de teste:
+
+`cd univesp-pi-3`
+
+`coverage erase`
+
+`coverage run -m pytest tests`
+
+`coverage report`
+
+`coverage html`
+
+`pytest --cov`
+
+`pytest --cov-report html --cov`
+
+`python3 manage.py test`
