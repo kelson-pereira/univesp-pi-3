@@ -78,6 +78,7 @@ def signup_view(request):
 def reset_view(request):
     return render(request, 'reset.html')
 
+@login_required(login_url='login')
 @csrf_exempt
 def dashboard(request, id):
     device = Device.objects.get(mac_address=id)
